@@ -1,0 +1,14 @@
+[gd_scene format=3 uid="uid://2vq8jc5hcuwy"]
+
+[ext_resource type="Texture2D" uid="uid://cuspn0rdyg4r3" path="res://ART/square-16.png" id="2_i3pqv"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_08422"]
+size = Vector2(12, 12)
+
+[node name="Actor" type="CharacterBody2D" unique_id=1795983393]
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=82617073]
+texture = ExtResource("2_i3pqv")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1626336945]
+shape = SubResource("RectangleShape2D_08422")
