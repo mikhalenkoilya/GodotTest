@@ -198,59 +198,26 @@ metadata/_custom_type_script = "uid://qefyhqelaun"
 [node name="ActorPlayer" parent="TileMap/TurnManager" unique_id=148278015 instance=ExtResource("7_o8fc1")]
 position = Vector2(40, 23)
 script = ExtResource("8_4mrxx")
-CELL_SIZE = 16
-SPEED = 200.0
-max_health = null
-current_health = null
-attack_damage = null
-is_friendly = true
 
 [node name="ActorPlayer2" parent="TileMap/TurnManager" unique_id=1705867267 instance=ExtResource("7_o8fc1")]
 position = Vector2(40, -9)
 script = ExtResource("8_4mrxx")
-CELL_SIZE = 16
-SPEED = 200.0
-max_health = null
-current_health = null
-attack_damage = null
-is_friendly = true
 
 [node name="ActorPlayer3" parent="TileMap/TurnManager" unique_id=781307706 instance=ExtResource("7_o8fc1")]
 position = Vector2(40, 87)
 script = ExtResource("8_4mrxx")
-CELL_SIZE = 16
-SPEED = 200.0
-max_health = null
-current_health = null
-attack_damage = null
-is_friendly = true
 
 [node name="ActorEnemy" parent="TileMap/TurnManager" unique_id=603810021 instance=ExtResource("7_o8fc1")]
 position = Vector2(200, 87)
 script = ExtResource("8_4mrxx")
-CELL_SIZE = 16
-SPEED = 200.0
-max_health = null
-current_health = null
-attack_damage = null
-is_friendly = null
+is_friendly = false
 
 [node name="ActorEnemy2" parent="TileMap/TurnManager" unique_id=1790968418 instance=ExtResource("7_o8fc1")]
 position = Vector2(200, -9)
 script = ExtResource("8_4mrxx")
-CELL_SIZE = 16
-SPEED = 200.0
-max_health = null
-current_health = null
-attack_damage = null
-is_friendly = null
+is_friendly = false
 
 [node name="ActorEnemy3" parent="TileMap/TurnManager" unique_id=1326721702 instance=ExtResource("7_o8fc1")]
 position = Vector2(200, 39)
 script = ExtResource("8_4mrxx")
-CELL_SIZE = 16
-SPEED = 200.0
-max_health = null
-current_health = null
-attack_damage = null
-is_friendly = null
+is_friendly = false
