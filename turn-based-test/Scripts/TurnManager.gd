@@ -245,10 +245,11 @@ func _make_ai_moves_and_attacks() -> void:
 		var delta_x = user_cell.x - ai_cell.x
 		var delta_y = user_cell.y - ai_cell.y
 		var total_distance = abs(delta_x) + abs(delta_y)
-		
-		if total_distance > 1:
-			var move_range = enemy.class_data.move_range if enemy.class_data else 3
-			var desired_move_distance = clampi(total_distance - 1, 0, move_range)
+		var attack_range = enemy.class_data.attack_range if enemy.class_data else 1
+
+		if total_distance > attack_range:
+    		var move_range = enemy.class_data.move_range if enemy.class_data else 3
+    		var desired_move_distance = clampi(total_distance - attack_range, 0, move_range)
 			var current_check_cell = ai_cell
 			var steps_remaining = desired_move_distance
 			
@@ -287,12 +288,14 @@ func _make_ai_moves_and_attacks() -> void:
 				ai_cell = current_check_cell
 		
 		user_cell = tile_map.local_to_map(tile_map.to_local(target_player.global_position))
+		user_cell = tile_map.local_to_map(tile_map.to_local(target_player.global_position))
 		var final_dist = abs(user_cell.x - ai_cell.x) + abs(user_cell.y - ai_cell.y)
-		
-		if final_dist == 1:
-			print("🤖 ", enemy.name, " наносит удар по ", target_player.name)
-			await get_tree().create_timer(0.2).timeout
-			target_player.take_damage(enemy.attack_damage)
+		var ai_attack_range = enemy.class_data.attack_range if enemy.class_data else 1
+
+		if final_dist <= ai_attack_range:
+    		print("🤖 ", enemy.name, " наносит удар по ", target_player.name)
+    		await get_tree().create_timer(0.2).timeout
+    		target_player.take_damage(enemy.attack_damage)
 			
 		await get_tree().create_timer(0.3).timeout
 		
@@ -303,14 +306,14 @@ func _make_ai_moves_and_attacks() -> void:
 # ============================================================
 func _is_cell_occupied(cell: Vector2i) -> bool:
 	for actor in friendly_actors + enemy_actors:
-		if is_instance_valid(actor):
+		if is_instance_valid(actor) and not actor.is_dead:
 			var a_cell = tile_map.local_to_map(tile_map.to_local(actor.global_position))
 			if cell == a_cell: return true
 	return false
 
 func _get_actor_at_cell(cell: Vector2i, list: Array[Actor]) -> Actor:
 	for actor in list:
-		if is_instance_valid(actor) or not actor.is_dead:
+		if is_instance_valid(actor) and not actor.is_dead:
 			var a_cell = tile_map.local_to_map(tile_map.to_local(actor.global_position))
 			if cell == a_cell: return actor
 	return null
