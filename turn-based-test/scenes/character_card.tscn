@@ -1,0 +1,49 @@
+[gd_scene format=3 uid="uid://xp8y75cngefo"]
+
+[ext_resource type="Script" uid="uid://c6kcrqaoe6lsy" path="res://Scripts/character_card.gd" id="1_3nck4"]
+
+[node name="Control" type="Control" unique_id=1486632148]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="." unique_id=1270507088]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+script = ExtResource("1_3nck4")
+
+[node name="ClassNameLabel" type="Label" parent="VBoxContainer" unique_id=1470915681]
+layout_mode = 2
+
+[node name="SpriteRect" type="TextureRect" parent="VBoxContainer" unique_id=1271906936]
+layout_mode = 2
+
+[node name="StatsContainer" type="VBoxContainer" parent="VBoxContainer" unique_id=860445257]
+layout_mode = 2
+
+[node name="HPLabel" type="Label" parent="VBoxContainer/StatsContainer" unique_id=1685978663]
+layout_mode = 2
+
+[node name="DmgLabel" type="Label" parent="VBoxContainer/StatsContainer" unique_id=1883935103]
+layout_mode = 2
+
+[node name="MoveLabel" type="Label" parent="VBoxContainer/StatsContainer" unique_id=2068702424]
+layout_mode = 2
+
+[node name="RangeLabel" type="Label" parent="VBoxContainer/StatsContainer" unique_id=1638725263]
+layout_mode = 2
+
+[node name="ButtonsContainer" type="HBoxContainer" parent="." unique_id=1810252982]
+layout_mode = 0
+
+[node name="PrevButton" type="Button" parent="ButtonsContainer" unique_id=727558800]
+layout_mode = 2
+text = "<"
+
+[node name="NextButton" type="Button" parent="ButtonsContainer" unique_id=1535608568]
+layout_mode = 2
+text = ">"

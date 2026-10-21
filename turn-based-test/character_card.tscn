@@ -1,0 +1,29 @@
+[gd_scene format=3 uid="uid://defrodcxu0l3g"]
+
+[ext_resource type="Script" uid="uid://c6kcrqaoe6lsy" path="res://Scripts/character_card.gd" id="1_3nck4"]
+
+[node name="VBoxContainer" type="VBoxContainer" unique_id=96480963]
+offset_right = 40.0
+offset_bottom = 40.0
+script = ExtResource("1_3nck4")
+
+[node name="ClassNameLabel" type="Label" parent="." unique_id=987048901]
+layout_mode = 2
+
+[node name="SpriteRect" type="TextureRect" parent="." unique_id=1333789960]
+layout_mode = 2
+
+[node name="StatsContainer" type="VBoxContainer" parent="." unique_id=2078351707]
+layout_mode = 2
+
+[node name="HPLabel" type="Label" parent="StatsContainer" unique_id=9600551]
+layout_mode = 2
+
+[node name="DmgLabel" type="Label" parent="StatsContainer" unique_id=1979177899]
+layout_mode = 2
+
+[node name="MoveLabel" type="Label" parent="StatsContainer" unique_id=748191623]
+layout_mode = 2
+
+[node name="RangeLabel" type="Label" parent="StatsContainer" unique_id=2024950776]
+layout_mode = 2
