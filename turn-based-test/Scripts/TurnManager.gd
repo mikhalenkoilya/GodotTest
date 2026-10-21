@@ -44,7 +44,8 @@ func _start_new_round() -> void:
 	current_phase = Phase.MOVE
 	selected_actor = null
 	_clear_highlight()
-	friendly_remaining_moves = friendly_actors.filter(func(a): return is_instance_valid(a))
+	# Fixed: ensure dead actors aren't given moves at the start of a new round
+	friendly_remaining_moves = friendly_actors.filter(func(a): return is_instance_valid(a) and not a.is_dead)
 	print("⚔️ Наступил Ваш ход!")
 
 # ============================================================
