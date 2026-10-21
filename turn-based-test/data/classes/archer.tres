@@ -5,4 +5,4 @@ display_name = "Лучник"
 max_hp = 70
 attack_damage = 12
 move_range = 3
-attack_range = 3
+attack_range = 5
