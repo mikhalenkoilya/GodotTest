@@ -30,10 +30,13 @@ const HIGHLIGHT_ATLAS_COORDS = Vector2i(0, 0)
 const ATTACK_ATLAS_COORDS = Vector2i(1, 0)
 
 func _ready() -> void:
-	_initialize_game_elements()
-	if Engine.is_editor_hint(): return
-	_snap_all_actors_to_grid()
 	_create_end_turn_button()
+
+# Called by world.gd after actors are spawned
+func initialize_game() -> void:
+	if Engine.is_editor_hint(): return
+	_initialize_game_elements()
+	_snap_all_actors_to_grid()
 	_start_new_round()
 
 func _start_new_round() -> void:
