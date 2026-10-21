@@ -252,8 +252,8 @@ func _make_ai_moves_and_attacks() -> void:
 		var attack_range = enemy.class_data.attack_range if enemy.class_data else 1
 
 		if total_distance > attack_range:
-    		var move_range = enemy.class_data.move_range if enemy.class_data else 3
-    		var desired_move_distance = clampi(total_distance - attack_range, 0, move_range)
+			var move_range = enemy.class_data.move_range if enemy.class_data else 3
+			var desired_move_distance = clampi(total_distance - attack_range, 0, move_range)
 			var current_check_cell = ai_cell
 			var steps_remaining = desired_move_distance
 			
@@ -297,9 +297,9 @@ func _make_ai_moves_and_attacks() -> void:
 		var ai_attack_range = enemy.class_data.attack_range if enemy.class_data else 1
 
 		if final_dist <= ai_attack_range:
-    		print("🤖 ", enemy.name, " наносит удар по ", target_player.name)
-    		await get_tree().create_timer(0.2).timeout
-    		target_player.take_damage(enemy.attack_damage)
+			print("🤖 ", enemy.name, " наносит удар по ", target_player.name)
+			await get_tree().create_timer(0.2).timeout
+			target_player.take_damage(enemy.attack_damage)
 			
 		await get_tree().create_timer(0.3).timeout
 		

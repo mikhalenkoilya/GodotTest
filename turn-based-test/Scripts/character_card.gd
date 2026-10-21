@@ -3,16 +3,19 @@ extends VBoxContainer
 
 @export var slot_index: int = 0
 
+# --- FIXED PATHS ---
 @onready var class_name_label = $ClassNameLabel
 @onready var sprite_rect = $SpriteRect
-@onready var hp_label = $HPLabel
-@onready var dmg_label = $DmgLabel
-@onready var move_label = $MoveLabel
-@onready var range_label = $RangeLabel
+
+# These are inside the StatsContainer, so we must include it in the path:
+@onready var hp_label = $StatsContainer/HPLabel
+@onready var dmg_label = $StatsContainer/DmgLabel
+@onready var move_label = $StatsContainer/MoveLabel
+@onready var range_label = $StatsContainer/RangeLabel
 
 func _ready() -> void:
-	$PrevButton.pressed.connect(_on_prev_pressed)
-	$NextButton.pressed.connect(_on_next_pressed)
+	$ButtonsContainer/PrevButton.pressed.connect(_on_prev_pressed)
+	$ButtonsContainer/NextButton.pressed.connect(_on_next_pressed)
 	update_ui()
 
 func update_ui() -> void:

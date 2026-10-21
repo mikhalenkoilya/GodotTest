@@ -8,6 +8,7 @@
 [ext_resource type="Script" uid="uid://qefyhqelaun" path="res://Scripts/TurnManager.gd" id="6_4mrxx"]
 [ext_resource type="PackedScene" uid="uid://2vq8jc5hcuwy" path="res://scenes/actor_player.tscn" id="7_o8fc1"]
 [ext_resource type="Script" uid="uid://dkjfll8vf36rp" path="res://Scripts/actor.gd" id="8_4mrxx"]
+[ext_resource type="Script" uid="uid://b217idjjy25pn" path="res://Scripts/class_data.gd" id="9_7r4gi"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_gbfbk"]
 texture = ExtResource("3_w7kh3")
@@ -163,6 +164,20 @@ texture = ExtResource("5_q5onr")
 [sub_resource type="TileSet" id="TileSet_08422"]
 sources/0 = SubResource("TileSetAtlasSource_pkg7o")
 
+[sub_resource type="Resource" id="Resource_4mrxx"]
+script = ExtResource("9_7r4gi")
+metadata/_custom_type_script = "uid://b217idjjy25pn"
+
+[sub_resource type="Resource" id="Resource_w7kh3"]
+script = ExtResource("9_7r4gi")
+attack_damage = 25
+metadata/_custom_type_script = "uid://b217idjjy25pn"
+
+[sub_resource type="Resource" id="Resource_e3hyu"]
+script = ExtResource("9_7r4gi")
+attack_damage = 25
+metadata/_custom_type_script = "uid://b217idjjy25pn"
+
 [node name="World" type="Node2D" unique_id=434652317]
 script = ExtResource("1_4mrxx")
 
@@ -198,14 +213,17 @@ metadata/_custom_type_script = "uid://qefyhqelaun"
 [node name="ActorPlayer" parent="TileMap/TurnManager" unique_id=148278015 instance=ExtResource("7_o8fc1")]
 position = Vector2(40, 23)
 script = ExtResource("8_4mrxx")
+class_data = SubResource("Resource_4mrxx")
 
 [node name="ActorPlayer2" parent="TileMap/TurnManager" unique_id=1705867267 instance=ExtResource("7_o8fc1")]
 position = Vector2(40, -9)
 script = ExtResource("8_4mrxx")
+class_data = SubResource("Resource_w7kh3")
 
 [node name="ActorPlayer3" parent="TileMap/TurnManager" unique_id=781307706 instance=ExtResource("7_o8fc1")]
 position = Vector2(40, 87)
 script = ExtResource("8_4mrxx")
+class_data = SubResource("Resource_e3hyu")
 
 [node name="ActorEnemy" parent="TileMap/TurnManager" unique_id=603810021 instance=ExtResource("7_o8fc1")]
 position = Vector2(200, 87)
