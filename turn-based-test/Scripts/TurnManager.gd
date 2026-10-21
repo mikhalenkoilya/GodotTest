@@ -57,7 +57,7 @@ func _start_new_round() -> void:
 func _input(event: InputEvent) -> void:
 	# Горячая клавиша завершения хода
 	if event is InputEventKey and event.pressed:
-		if event.keycode == KEY_ENTER or event.keycode == KEY_E:
+		if Input.is_action_just_pressed("end_turn"):
 			_on_end_turn_button_pressed()
 			return
 	

@@ -44,10 +44,10 @@ func take_damage(amount: int) -> void:
 # === ВСПЫШКА ПРИ УРОНЕ ===
 func _flash_damage() -> void:
 	var base_color = FRIENDLY_COLOR if is_friendly else ENEMY_COLOR
-	self.modulate = Color.WHITE # Fixed: use valid Color.WHITE
-	
+	var target_color = FRIENDLY_COLOR if is_friendly else ENEMY_COLOR
 	var tween = create_tween()
-	tween.tween_property(self, "modulate", base_color, 0.2).set_trans(Tween.TRANS_SINE)
+	tween.tween_property(self, "modulate", Color.WHITE, 0.08)
+	tween.tween_property(self, "modulate", target_color, 0.12)
 
 # === СМЕРТЬ ===
 func die() -> void:

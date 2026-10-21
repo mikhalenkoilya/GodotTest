@@ -1,14 +1,28 @@
-# res://Scripts/SquadManager.gd
 extends Node
 
-# Paths to your class resources
+# Example data structure for your squad
+var squad_members: Array[Actor] = []
+
+func _ready() -> void:
+	print("✅ SquadManager Autoload is working!")
+
+func add_to_squad(actor: Actor) -> void:
+	if actor and not squad_members.has(actor):
+		squad_members.append(actor)
+		print("Added ", actor.name, " to squad.")
+
+func remove_from_squad(actor: Actor) -> void:
+	squad_members.erase(actor)
+	
+# Paths to your class resources (FIXED: added 'turn-based-test/' to the path)
+# Paths to your class resources (CORRECTED - remove 'turn-based-test/')
 var available_classes: Array[String] = [
 	"res://data/classes/warrior.tres",
 	"res://data/classes/archer.tres",
 	"res://data/classes/mage.tres"
 ]
 
-# Default squad composition (can be changed by the player)
+# Default squad composition
 var squad_classes: Array[String] = [
 	"res://data/classes/warrior.tres",
 	"res://data/classes/archer.tres",
@@ -18,7 +32,11 @@ var squad_classes: Array[String] = [
 # Get the ClassData resource for a specific squad slot (0, 1, or 2)
 func get_class_data(slot_index: int) -> ClassData:
 	var path = squad_classes[slot_index]
-	return load(path) as ClassData
+	var loaded_resource = load(path)
+	if loaded_resource == null:
+		push_error("Failed to load class data at: " + path)
+		return null
+	return loaded_resource as ClassData
 
 # Cycle to the next or previous class for a specific slot
 func cycle_class(slot_index: int, direction: int) -> void:
