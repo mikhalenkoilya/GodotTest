@@ -1,3 +1,8 @@
-[gd_resource type="Resource" format=3 uid="uid://d2g72jcv7tmer"]
+[gd_resource type="Resource" format=3 uid="uid://y4u1833v0qip"]
 
 [resource]
+display_name = "Воин"
+max_hp = 100
+attack_damage = 20
+move_range = 3
+attack_range = 1
