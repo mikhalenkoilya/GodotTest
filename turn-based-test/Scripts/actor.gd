@@ -21,10 +21,16 @@ func _ready() -> void:
 	if class_data:
 		max_health = class_data.max_hp
 		attack_damage = class_data.attack_damage
-		# Если есть текстура в ресурсе, применяем её к спрайту
-		var sprite = get_node_or_null("Sprite2D") as Sprite2D
-		if sprite and class_data.sprite_texture:
-			sprite.texture = class_data.sprite_texture
+		
+		# === НАСТРОЙКА ANIMATEDSPRITE2D ===
+		var anim_sprite = get_node_or_null("AnimatedSprite2D") as AnimatedSprite2D
+		if anim_sprite:
+			# Запускаем анимацию "idle" (или первую доступную, если idle нет)
+			if anim_sprite.sprite_frames:
+				if anim_sprite.sprite_frames.has_animation("idle"):
+					anim_sprite.play("idle")
+				elif anim_sprite.sprite_frames.get_animation_names().size() > 0:
+					anim_sprite.play(anim_sprite.sprite_frames.get_animation_names()[0])
 	
 	current_health = max_health
 	_update_visuals()
@@ -37,11 +43,36 @@ func take_damage(amount: int) -> void:
 	current_health = maxi(current_health - amount, 0)
 	print("⚔️ ", name, " получил ", amount, " урона! Осталось HP: ", current_health, "/", max_health)
 	
-	_flash_damage()
+	await _play_hit_animation()
 	
 	if current_health <= 0:
-		die()
+		await die() # ВАЖНО: Обязательно добавляем await перед die()
 
+func _play_hit_animation() -> void:
+	var anim_sprite = get_node_or_null("AnimatedSprite2D") as AnimatedSprite2D
+	if not anim_sprite or not anim_sprite.sprite_frames:
+		_flash_damage()
+		return
+
+	# Пытаемся сыграть анимацию удара
+	if anim_sprite.sprite_frames.has_animation("hit"):
+		anim_sprite.play("hit")
+		await anim_sprite.animation_finished
+	else:
+		_flash_damage() # Если анимации нет, используем вспышку
+		return
+
+	# Возвращаемся к idle, если персонаж еще жив
+	if not is_dead:
+		_safe_play_anim("idle")
+
+func _safe_play_anim(anim_name: String) -> bool:
+	var anim_sprite = get_node_or_null("AnimatedSprite2D") as AnimatedSprite2D
+	if anim_sprite and anim_sprite.sprite_frames and anim_sprite.sprite_frames.has_animation(anim_name):
+		anim_sprite.play(anim_name)
+		return true
+	return false
+	
 # === ВСПЫШКА ПРИ УРОНЕ ===
 func _flash_damage() -> void:
 	var base_color = FRIENDLY_COLOR if is_friendly else ENEMY_COLOR
@@ -51,14 +82,28 @@ func _flash_damage() -> void:
 	tween.tween_property(self, "modulate", target_color, 0.12)
 
 # === СМЕРТЬ ===
+# === СМЕРТЬ ===
+# === СМЕРТЬ ===
 func die() -> void:
 	if is_dead:
 		return
 	
 	is_dead = true
 	current_health = 0
-	visible = false
 	print("💀 ", name, " погиб!")
+	
+	var anim_sprite = get_node_or_null("AnimatedSprite2D") as AnimatedSprite2D
+	
+	# Проигрываем анимацию смерти и ждём её окончания
+	if anim_sprite and anim_sprite.sprite_frames and anim_sprite.sprite_frames.has_animation("death"):
+		anim_sprite.play("death")
+		await anim_sprite.animation_finished
+	else:
+		print("⚠️ Анимация 'death' не найдена! Ждём 0.5 сек.")
+		await get_tree().create_timer(0.5).timeout
+	
+	# Удаляем персонажа только после завершения анимации
+	visible = false
 	queue_free()
 
 # === ДВИЖЕНИЕ ===
@@ -66,20 +111,27 @@ func move_to(target_global_pos: Vector2) -> void:
 	if is_dead:
 		return
 	
+	# Запускаем анимацию ходьбы (если есть)
+	if not _safe_play_anim("move"):
+		_safe_play_anim("walk") # Запасной вариант, если анимация называется "walk"
+	
 	var tween = create_tween()
 	tween.tween_property(self, "global_position", target_global_pos, 0.3) \
 		.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 	await tween.finished
-
+	
+	# Возвращаемся в режим ожидания
+	_safe_play_anim("idle")
 # === ВНЕШНИЙ ВИД (КРИТИЧЕСКИ ВАЖНО) ===
 func _update_visuals() -> void:
-	# Применяем цвет к САМОМУ узлу Actor, а не к спрайту
-	# Тогда все дочерние элементы (спрайт, HP-бар) будут окрашены
+	# 1. Применяем цвет фракции ко всему узлу
 	var target_color = FRIENDLY_COLOR if is_friendly else ENEMY_COLOR
 	self.modulate = target_color
 	
-	# Опционально: если нужно дополнительно настроить спрайт
-	var sprite = get_node_or_null("Sprite2D") as Sprite2D
-	if sprite:
-		sprite.centered = true
-		sprite.position = Vector2.ZERO
+	# 2. Настройка и поворот AnimatedSprite2D
+	var anim_sprite = get_node_or_null("AnimatedSprite2D") as AnimatedSprite2D
+	if anim_sprite:
+		anim_sprite.centered = true
+		anim_sprite.position = Vector2.ZERO
+		
+		anim_sprite.flip_h = not is_friendly 

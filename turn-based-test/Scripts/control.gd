@@ -1,36 +1,53 @@
 # res://Scripts/control.gd
 extends Control
 
-@onready var squad_panel: Control = $VBoxContainer/SquadPanel
+const CHARACTER_CARD_SCENE = preload("res://scenes/character_card.tscn")
+
 @onready var card_container: HBoxContainer = $VBoxContainer/SquadPanel/CardContainer
 @onready var start_battle_button: Button = $VBoxContainer/HBoxContainer/StartBattleButton
 @onready var squad_button: Button = $VBoxContainer/HBoxContainer/SquadButton
 
 func _ready() -> void:
-	# 1. Verify nodes are actually found
-	if not squad_panel:
-		push_error("CRITICAL: 'SquadPanel' not found! Check your scene tree path.")
-	if not card_container:
-		push_warning("WARNING: 'CardContainer' not found! Check your scene tree path.")
-		
+	print(" DEBUG: _ready() called")
+	print("🔍 DEBUG: squad_button = ", squad_button)
+	print("🔍 DEBUG: card_container = ", card_container)
+	
 	if start_battle_button:
 		start_battle_button.pressed.connect(_on_start_battle_pressed)
+		print("✅ StartBattleButton connected")
 	else:
-		push_warning("StartBattleButton not found! Check scene tree.")
+		push_warning("❌ StartBattleButton not found!")
 		
 	if squad_button:
 		squad_button.pressed.connect(_on_squad_button_pressed)
+		print("✅ SquadButton connected")
 	else:
-		push_warning("SquadButton not found! Check scene tree.")
+		push_warning("❌ SquadButton not found! Check the path.")
+	
+	_spawn_character_cards()
+
+func _spawn_character_cards() -> void:
+	for child in card_container.get_children():
+		child.queue_free()
+	
+	var squad_size = SquadManager.squad_classes.size()
+	
+	for i in range(squad_size):
+		var card = CHARACTER_CARD_SCENE.instantiate()
+		card_container.add_child(card)
+		card.setup(i) 
 
 func _on_start_battle_pressed() -> void:
 	print("🚀 Starting Battle...")
 	get_tree().change_scene_to_file("res://scenes/world.tscn")
 
 func _on_squad_button_pressed() -> void:
-	# 2. Safely toggle the visibility
+	print("🔄 Squad button pressed!")
+	
+	# Скрываем/показываем весь SquadPanel, а не только CardContainer
+	var squad_panel = $VBoxContainer/SquadPanel
 	if squad_panel:
 		squad_panel.visible = !squad_panel.visible
-		print("🔄 Squad Panel is now: ", "VISIBLE" if squad_panel.visible else "HIDDEN")
+		print("🔍 SquadPanel visible: ", squad_panel.visible)
 	else:
-		push_error("Cannot toggle Squad Panel: squad_panel is null!")
+		card_container.visible = !card_container.visible

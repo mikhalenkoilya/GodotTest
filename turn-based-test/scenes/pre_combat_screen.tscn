@@ -1,12 +1,11 @@
 [gd_scene format=3 uid="uid://ce0rueadqje3d"]
 
 [ext_resource type="Script" uid="uid://c4cseyg0c76tj" path="res://Scripts/control.gd" id="1_jkbjh"]
-[ext_resource type="PackedScene" uid="uid://xp8y75cngefo" path="res://scenes/character_card.tscn" id="2_clxg7"]
 
 [sub_resource type="LabelSettings" id="LabelSettings_2but5"]
 font_size = 32
 
-[node name="Control" type="Control" unique_id=1564051778]
+[node name="pre_combat scr" type="Control" unique_id=1564051778]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -33,9 +32,6 @@ visible = false
 layout_mode = 2
 
 [node name="CardContainer" type="HBoxContainer" parent="VBoxContainer/SquadPanel" unique_id=1101669185]
-layout_mode = 2
-
-[node name="Control" parent="VBoxContainer/SquadPanel/CardContainer" unique_id=1486632148 instance=ExtResource("2_clxg7")]
 layout_mode = 2
 
 [node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer" unique_id=1733143107]

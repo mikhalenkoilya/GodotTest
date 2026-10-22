@@ -3,8 +3,9 @@ extends Node2D
 # Preload the actor scene (make sure this path matches your actual player actor scene)
 const PLAYER_ACTOR_SCENE = preload("res://scenes/actor_player.tscn")
 
-@onready var turn_manager: Node = $TileMap/TurnManager # Adjust path to match your tree
-@onready var player_spawn: Marker2D = $PlayerSpawnPoint
+@onready var turn_manager: Node = $Tiles/TurnManager # Adjust path to match your tree
+@onready var spawn_point_0: Marker2D = $SpawnPoint_0
+
 
 func _ready() -> void:
 	_spawn_squad()

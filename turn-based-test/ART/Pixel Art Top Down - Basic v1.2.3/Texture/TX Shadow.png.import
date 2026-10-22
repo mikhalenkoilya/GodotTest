@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://cuspn0rdyg4r3"
-path="res://.godot/imported/square-16.png-54ad9b7a612957e4bee9abae1e37c3da.ctex"
+uid="uid://b8x3r7lktqs8t"
+path="res://.godot/imported/TX Shadow.png-ac87cc7f8afe7761f1ce47b218526592.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://ART/square-16.png"
-dest_files=["res://.godot/imported/square-16.png-54ad9b7a612957e4bee9abae1e37c3da.ctex"]
+source_file="res://ART/Pixel Art Top Down - Basic v1.2.3/Texture/TX Shadow.png"
+dest_files=["res://.godot/imported/TX Shadow.png-ac87cc7f8afe7761f1ce47b218526592.ctex"]
 
 [params]
 

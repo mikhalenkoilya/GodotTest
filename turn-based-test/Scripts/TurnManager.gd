@@ -9,7 +9,7 @@ var enemy_actors: Array[Actor] = []
 var friendly_remaining_moves: Array[Actor] = []
 
 var selected_actor: Actor = null
-var actor_start_global_pos: Vector2 = Vector2.ZERO  # Для отмены хода
+var actor_start_global_pos: Vector2 = Vector2.ZERO
 
 enum Turn { USER, AI }
 var current_turn: Turn = Turn.USER
@@ -20,19 +20,16 @@ var current_phase: Phase = Phase.MOVE
 var highlighted_cells: Array[Vector2i] = []
 var is_processing_move: bool = false
 
-# --- UI ---
+const TILE_SOURCE_ID = 1
+const HIGHLIGHT_ATLAS_COORDS = Vector2i(0, 0)
+const ATTACK_ATLAS_COORDS = Vector2i(0, 0)
+
 var ui_layer: CanvasLayer = null
 var end_turn_button: Button = null
-
-# --- НАСТРОЙКИ ТАЙЛОВ ПОДСВЕТКИ ---
-const TILE_SOURCE_ID = 0
-const HIGHLIGHT_ATLAS_COORDS = Vector2i(0, 0)
-const ATTACK_ATLAS_COORDS = Vector2i(1, 0)
 
 func _ready() -> void:
 	_create_end_turn_button()
 
-# Called by world.gd after actors are spawned
 func initialize_game() -> void:
 	if Engine.is_editor_hint(): return
 	_initialize_game_elements()
@@ -47,7 +44,6 @@ func _start_new_round() -> void:
 	current_phase = Phase.MOVE
 	selected_actor = null
 	_clear_highlight()
-	# Fixed: ensure dead actors aren't given moves at the start of a new round
 	friendly_remaining_moves = friendly_actors.filter(func(a): return is_instance_valid(a) and not a.is_dead)
 	print("⚔️ Наступил Ваш ход!")
 
@@ -55,7 +51,6 @@ func _start_new_round() -> void:
 # ВВОД
 # ============================================================
 func _input(event: InputEvent) -> void:
-	# Горячая клавиша завершения хода
 	if event is InputEventKey and event.pressed:
 		if Input.is_action_just_pressed("end_turn"):
 			_on_end_turn_button_pressed()
@@ -68,15 +63,12 @@ func _input(event: InputEvent) -> void:
 		var local_mouse_pos = tile_map.get_local_mouse_position()
 		var target_cell = tile_map.local_to_map(local_mouse_pos)
 		
-		# === ПКМ: ОТМЕНА ===
 		if event.button_index == MOUSE_BUTTON_RIGHT:
 			if current_phase == Phase.ATTACK and selected_actor != null:
-				print("↩️ Ход отменен. Боец возвращается на исходную позицию.")
+				print("↩️ Ход отменен.")
 				selected_actor.global_position = actor_start_global_pos
 				var start_cell = tile_map.local_to_map(tile_map.to_local(actor_start_global_pos))
 				selected_actor.global_position = tile_map.to_global(tile_map.map_to_local(start_cell))
-				
-				# НЕ завершаем ход — игрок может выбрать персонажа снова
 				selected_actor = null
 				_clear_highlight()
 				current_phase = Phase.MOVE
@@ -86,9 +78,7 @@ func _input(event: InputEvent) -> void:
 				print("❌ Выбор отменен.")
 			return
 			
-		# === ЛКМ: ОСНОВНОЕ ДЕЙСТВИЕ ===
 		if event.button_index == MOUSE_BUTTON_LEFT:
-			# --- ФАЗА ДВИЖЕНИЯ ---
 			if current_phase == Phase.MOVE:
 				var clicked_friendly = _get_actor_at_cell(target_cell, friendly_actors)
 				
@@ -116,11 +106,10 @@ func _input(event: InputEvent) -> void:
 							_switch_to_attack_phase()
 						return
 						
-					print("🛑 Движение пропущено. Переход к фазе атаки.")
+					print(" Движение пропущено. Переход к фазе атаки.")
 					_switch_to_attack_phase()
 					return
 					
-			# --- ФАЗА АТАКИ ---
 			elif current_phase == Phase.ATTACK and selected_actor:
 				var actor_cell = tile_map.local_to_map(tile_map.to_local(selected_actor.global_position))
 				
@@ -132,10 +121,10 @@ func _input(event: InputEvent) -> void:
 				var target_enemy = _get_actor_at_cell(target_cell, enemy_actors)
 				if target_enemy:
 					print("⚔️ ", selected_actor.name, " атакует ", target_enemy.name)
-					target_enemy.take_damage(selected_actor.attack_damage)
+					await target_enemy.take_damage(selected_actor.attack_damage)
 					_complete_actor_turn()
 				else:
-					print("❌ На этой клетке нет врага.")
+					print(" На этой клетке нет врага.")
 
 # ============================================================
 # ФАЗЫ
@@ -176,7 +165,8 @@ func _highlight_available_moves(actor: Actor) -> void:
 			
 			if distance <= move_range and distance > 0:
 				if not _is_cell_occupied(check_cell):
-					grid_layer.set_cell(check_cell, source_id, HIGHLIGHT_ATLAS_COORDS)
+					# Используем синий тайл (0, 0)
+					grid_layer.set_cell(check_cell, source_id, Vector2i(0, 0))
 					highlighted_cells.append(check_cell)
 
 func _highlight_attack_range(actor: Actor) -> void:
@@ -185,14 +175,14 @@ func _highlight_attack_range(actor: Actor) -> void:
 	var source_id = _get_valid_source_id()
 	var attack_range = actor.class_data.attack_range if actor.class_data else 1
 	
-	print("🎯 Фаза Атаки! Радиус: ", attack_range)
+	print(" Фаза Атаки! Радиус: ", attack_range)
 	
 	for x in range(-attack_range, attack_range + 1):
 		for y in range(-attack_range, attack_range + 1):
 			var distance = abs(x) + abs(y)
 			if distance <= attack_range and distance > 0:
 				var check_cell = actor_cell + Vector2i(x, y)
-				grid_layer.set_cell(check_cell, source_id, ATTACK_ATLAS_COORDS)
+				grid_layer.set_cell(check_cell, source_id, Vector2i(1, 0))
 				highlighted_cells.append(check_cell)
 
 func _clear_highlight() -> void:
@@ -229,19 +219,15 @@ func _end_user_turn() -> void:
 
 func _make_ai_moves_and_attacks() -> void:
 	_clean_dead_actors()
-	# Фильтруем только живых и валидных врагов
 	var active_enemies = enemy_actors.filter(
 		func(e): return is_instance_valid(e) and not e.is_dead
 	)
 	
 	for enemy in active_enemies:
-		# Теперь проверка не нужна, но оставим для безопасности
 		if not is_instance_valid(enemy) or enemy.is_dead: continue
 		
 		var target_player = _find_closest_friendly(enemy)
 		if not target_player: continue
-		
-		# ... остальной код без изменений ...
 		
 		var ai_cell = tile_map.local_to_map(tile_map.to_local(enemy.global_position))
 		var user_cell = tile_map.local_to_map(tile_map.to_local(target_player.global_position))
@@ -290,7 +276,6 @@ func _make_ai_moves_and_attacks() -> void:
 			if current_check_cell != ai_cell:
 				var move_success = await _try_move_actor(enemy, current_check_cell)
 				if move_success:
-					# Пересчитываем реальную позицию после успешного движения
 					ai_cell = tile_map.local_to_map(tile_map.to_local(enemy.global_position))
 		
 		user_cell = tile_map.local_to_map(tile_map.to_local(target_player.global_position))
@@ -300,8 +285,10 @@ func _make_ai_moves_and_attacks() -> void:
 		if final_dist <= ai_attack_range:
 			print("🤖 ", enemy.name, " наносит удар по ", target_player.name)
 			await get_tree().create_timer(0.2).timeout
-			target_player.take_damage(enemy.attack_damage)
-			
+			await target_player.take_damage(enemy.attack_damage)
+			if target_player.is_dead:
+				await get_tree().create_timer(0.5).timeout
+				
 		await get_tree().create_timer(0.3).timeout
 		
 	_start_new_round()
@@ -328,7 +315,7 @@ func _find_closest_friendly(enemy: Actor) -> Actor:
 	var min_dist = 99999
 	var enemy_cell = tile_map.local_to_map(tile_map.to_local(enemy.global_position))
 	for player in friendly_actors:
-		if is_instance_valid(player) and not player.is_dead:  # <-- ДОБАВЛЕНО
+		if is_instance_valid(player) and not player.is_dead:
 			var p_cell = tile_map.local_to_map(tile_map.to_local(player.global_position))
 			var dist = abs(enemy_cell.x - p_cell.x) + abs(enemy_cell.y - p_cell.y)
 			if dist < min_dist:
@@ -340,7 +327,8 @@ func _get_valid_source_id() -> int:
 	var source_id = TILE_SOURCE_ID
 	if grid_layer and grid_layer.tile_set and grid_layer.tile_set.get_source_count() > 0:
 		var first_id = grid_layer.tile_set.get_source_id(0)
-		if source_id == 0 and first_id != -1: source_id = first_id
+		if first_id != -1:
+			source_id = first_id
 	return source_id
 
 func _clean_dead_actors() -> void:
@@ -405,7 +393,7 @@ func _snap_all_actors_to_grid() -> void:
 			actor.global_position = cell_global_center
 
 # ============================================================
-# UI — КНОПКА ЗАВЕРШЕНИЯ ХОДА
+# UI
 # ============================================================
 func _create_end_turn_button() -> void:
 	ui_layer = CanvasLayer.new()
@@ -434,22 +422,6 @@ func _on_end_turn_button_pressed() -> void:
 		return
 	
 	print("🏁 Игрок завершил ход досрочно.")
-	
-	# Просто очищаем состояние, не перемещая персонажа назад
-	friendly_remaining_moves.clear()
-	selected_actor = null
-	_clear_highlight()
-	current_phase = Phase.MOVE
-	
-	await _end_user_turn()
-	
-	print("🏁 Игрок завершил ход досрочно.")
-	
-	# Если был выбран персонаж в фазе атаки — возвращаем его на исходную позицию
-	if selected_actor != null and current_phase == Phase.ATTACK:
-		selected_actor.global_position = actor_start_global_pos
-		var start_cell = tile_map.local_to_map(tile_map.to_local(actor_start_global_pos))
-		selected_actor.global_position = tile_map.to_global(tile_map.map_to_local(start_cell))
 	
 	friendly_remaining_moves.clear()
 	selected_actor = null
