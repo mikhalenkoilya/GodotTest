@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bmau02h0ft0lk"
-path="res://.godot/imported/GridLayer.png-87e6d06065c229b3169afdaac11b62d5.ctex"
+uid="uid://bvs0c6rxqo3rt"
+path="res://.godot/imported/Idle.png-5493d8a93f336dd9730beda2b8cd0336.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://ART/Tilemap/GridLayer.png"
-dest_files=["res://.godot/imported/GridLayer.png-87e6d06065c229b3169afdaac11b62d5.ctex"]
+source_file="res://ART/Sprites/Idle.png"
+dest_files=["res://.godot/imported/Idle.png-5493d8a93f336dd9730beda2b8cd0336.ctex"]
 
 [params]
 

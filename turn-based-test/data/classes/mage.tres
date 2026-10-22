@@ -4,3 +4,8 @@
 
 [resource]
 script = ExtResource("1_sxcey")
+display_name = "Маг"
+max_hp = 60
+attack_damage = 50
+move_range = 2
+attack_range = 3

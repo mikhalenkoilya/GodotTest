@@ -25,7 +25,7 @@ var ui_layer: CanvasLayer = null
 var end_turn_button: Button = null
 
 # --- НАСТРОЙКИ ТАЙЛОВ ПОДСВЕТКИ ---
-const TILE_SOURCE_ID = 1
+const TILE_SOURCE_ID = 0
 const HIGHLIGHT_ATLAS_COORDS = Vector2i(0, 0)
 const ATTACK_ATLAS_COORDS = Vector2i(1, 0)
 
@@ -288,8 +288,10 @@ func _make_ai_moves_and_attacks() -> void:
 					break
 					
 			if current_check_cell != ai_cell:
-				await _try_move_actor(enemy, current_check_cell)
-				ai_cell = current_check_cell
+				var move_success = await _try_move_actor(enemy, current_check_cell)
+				if move_success:
+					# Пересчитываем реальную позицию после успешного движения
+					ai_cell = tile_map.local_to_map(tile_map.to_local(enemy.global_position))
 		
 		user_cell = tile_map.local_to_map(tile_map.to_local(target_player.global_position))
 		var final_dist = abs(user_cell.x - ai_cell.x) + abs(user_cell.y - ai_cell.y)
@@ -430,6 +432,16 @@ func _create_end_turn_button() -> void:
 func _on_end_turn_button_pressed() -> void:
 	if current_turn != Turn.USER or is_processing_move:
 		return
+	
+	print("🏁 Игрок завершил ход досрочно.")
+	
+	# Просто очищаем состояние, не перемещая персонажа назад
+	friendly_remaining_moves.clear()
+	selected_actor = null
+	_clear_highlight()
+	current_phase = Phase.MOVE
+	
+	await _end_user_turn()
 	
 	print("🏁 Игрок завершил ход досрочно.")
 	

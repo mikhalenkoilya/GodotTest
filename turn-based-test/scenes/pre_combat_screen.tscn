@@ -21,6 +21,13 @@ offset_right = 40.0
 offset_bottom = 40.0
 alignment = 1
 
+[node name="Label" type="Label" parent="VBoxContainer" unique_id=508340781]
+layout_mode = 2
+text = "Tactical Battle"
+label_settings = SubResource("LabelSettings_2but5")
+horizontal_alignment = 1
+vertical_alignment = 1
+
 [node name="SquadPanel" type="PanelContainer" parent="VBoxContainer" unique_id=949667997]
 visible = false
 layout_mode = 2
@@ -41,10 +48,3 @@ text = "Start Battle!"
 [node name="SquadButton" type="Button" parent="VBoxContainer/HBoxContainer" unique_id=1234928086]
 layout_mode = 2
 text = "Squad"
-
-[node name="Label" type="Label" parent="VBoxContainer" unique_id=508340781]
-layout_mode = 2
-text = "Tactical Battle"
-label_settings = SubResource("LabelSettings_2but5")
-horizontal_alignment = 1
-vertical_alignment = 1
