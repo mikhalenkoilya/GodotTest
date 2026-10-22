@@ -1,25 +1,28 @@
-# res://scenes/pre_combat_screen.gd
+# res://Scripts/control.gd
 extends Control
 
 @onready var squad_panel = $VBoxContainer/SquadPanel
-@onready var cards_container = $VBoxContainer/SquadPanel/CardsContainer
+@onready var card_container: HBoxContainer = $VBoxContainer/SquadPanel/CardContainer
+@onready var start_battle_button: Button = $VBoxContainer/HBoxContainer/StartBattleButton
+@onready var squad_button: Button = $VBoxContainer/HBoxContainer/SquadButton
 
-var card_scene = preload("res://scenes/character_card.tscn")
 
 func _ready() -> void:
-	# Instantiate 3 character cards
-	for i in range(3):
-		var card = card_scene.instantiate()
-		card.slot_index = i
-		cards_container.add_child(card)
-	
-	# Wire up buttons
-	$VBoxContainer/SquadButton.pressed.connect(_on_squad_pressed)
-	$VBoxContainer/StartBattleButton.pressed.connect(_on_start_battle_pressed)
-
-func _on_squad_pressed() -> void:
-	squad_panel.visible = not squad_panel.visible
+	if start_battle_button:
+		start_battle_button.pressed.connect(_on_start_battle_pressed)
+	else:
+		push_warning("StartBattleButton not found! Check scene tree.")
+		
+	if squad_button:
+		squad_button.pressed.connect(_on_squad_button_pressed)
+	else:
+		push_warning("SquadButton not found! Check scene tree.")
 
 func _on_start_battle_pressed() -> void:
-	# Transition to the battle scene
-	get_tree().change_scene_to_file("res://world.tscn")
+	print("🚀 Starting Battle...")
+	get_tree().change_scene_to_file("res://scenes/world.tscn")
+
+func _on_squad_button_pressed() -> void:
+	print("🔄 Toggling Squad Panel")
+	# Toggle ONLY the card container, NOT the entire panel (which contains the buttons!)
+	card_container.visible = !card_container.visible

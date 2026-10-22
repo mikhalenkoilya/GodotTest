@@ -292,7 +292,6 @@ func _make_ai_moves_and_attacks() -> void:
 				ai_cell = current_check_cell
 		
 		user_cell = tile_map.local_to_map(tile_map.to_local(target_player.global_position))
-		user_cell = tile_map.local_to_map(tile_map.to_local(target_player.global_position))
 		var final_dist = abs(user_cell.x - ai_cell.x) + abs(user_cell.y - ai_cell.y)
 		var ai_attack_range = enemy.class_data.attack_range if enemy.class_data else 1
 

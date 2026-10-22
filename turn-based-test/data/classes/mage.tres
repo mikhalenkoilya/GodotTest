@@ -1,3 +1,6 @@
-[gd_resource type="Resource" format=3 uid="uid://drjimrgwv4ygu"]
+[gd_resource type="Resource" script_class="ClassData" format=3 uid="uid://drjimrgwv4ygu"]
+
+[ext_resource type="Script" uid="uid://b217idjjy25pn" path="res://Scripts/class_data.gd" id="1_sxcey"]
 
 [resource]
+script = ExtResource("1_sxcey")

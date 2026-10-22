@@ -1,5 +1,6 @@
 class_name Actor
-extends Node2D
+extends CharacterBody2D
+
 
 # === ДАННЫЕ КЛАССА ===
 @export var class_data: ClassData

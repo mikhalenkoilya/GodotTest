@@ -1,0 +1,50 @@
+[gd_scene format=3 uid="uid://ce0rueadqje3d"]
+
+[ext_resource type="Script" uid="uid://c4cseyg0c76tj" path="res://Scripts/control.gd" id="1_jkbjh"]
+[ext_resource type="PackedScene" uid="uid://xp8y75cngefo" path="res://scenes/character_card.tscn" id="2_clxg7"]
+
+[sub_resource type="LabelSettings" id="LabelSettings_2but5"]
+font_size = 32
+
+[node name="Control" type="Control" unique_id=1564051778]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_jkbjh")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="." unique_id=1284496260]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+alignment = 1
+
+[node name="SquadPanel" type="PanelContainer" parent="VBoxContainer" unique_id=949667997]
+visible = false
+layout_mode = 2
+
+[node name="CardContainer" type="HBoxContainer" parent="VBoxContainer/SquadPanel" unique_id=1101669185]
+layout_mode = 2
+
+[node name="Control" parent="VBoxContainer/SquadPanel/CardContainer" unique_id=1486632148 instance=ExtResource("2_clxg7")]
+layout_mode = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer" unique_id=1733143107]
+layout_mode = 2
+
+[node name="StartBattleButton" type="Button" parent="VBoxContainer/HBoxContainer" unique_id=1240525995]
+layout_mode = 2
+text = "Start Battle!"
+
+[node name="SquadButton" type="Button" parent="VBoxContainer/HBoxContainer" unique_id=1234928086]
+layout_mode = 2
+text = "Squad"
+
+[node name="Label" type="Label" parent="VBoxContainer" unique_id=508340781]
+layout_mode = 2
+text = "Tactical Battle"
+label_settings = SubResource("LabelSettings_2but5")
+horizontal_alignment = 1
+vertical_alignment = 1

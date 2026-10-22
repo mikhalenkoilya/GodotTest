@@ -14,8 +14,6 @@ func add_to_squad(actor: Actor) -> void:
 func remove_from_squad(actor: Actor) -> void:
 	squad_members.erase(actor)
 	
-# Paths to your class resources (FIXED: added 'turn-based-test/' to the path)
-# Paths to your class resources (CORRECTED - remove 'turn-based-test/')
 var available_classes: Array[String] = [
 	"res://data/classes/warrior.tres",
 	"res://data/classes/archer.tres",

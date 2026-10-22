@@ -1,8 +1,7 @@
-[gd_resource type="Resource" format=3 uid="uid://y4u1833v0qip"]
+[gd_resource type="Resource" script_class="ClassData" format=3 uid="uid://y4u1833v0qip"]
+
+[ext_resource type="Script" uid="uid://b217idjjy25pn" path="res://Scripts/class_data.gd" id="1_nib4j"]
 
 [resource]
+script = ExtResource("1_nib4j")
 display_name = "Копейщик"
-max_hp = 80
-attack_damage = 15
-move_range = 3
-attack_range = 2

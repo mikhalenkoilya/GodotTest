@@ -1,4 +1,4 @@
-[gd_scene format=3 uid="uid://defrodcxu0l3g"]
+[gd_scene format=3 uid="uid://4x4d0odnmdvm"]
 
 [ext_resource type="Script" uid="uid://c6kcrqaoe6lsy" path="res://Scripts/character_card.gd" id="1_3nck4"]
 
@@ -26,4 +26,13 @@ layout_mode = 2
 layout_mode = 2
 
 [node name="RangeLabel" type="Label" parent="StatsContainer" unique_id=2024950776]
+layout_mode = 2
+
+[node name="ButtonsContainer" type="HBoxContainer" parent="." unique_id=1373539847]
+layout_mode = 2
+
+[node name="PrevButton" type="Button" parent="ButtonsContainer" unique_id=1930166084]
+layout_mode = 2
+
+[node name="NextButton" type="Button" parent="ButtonsContainer" unique_id=1330724931]
 layout_mode = 2
