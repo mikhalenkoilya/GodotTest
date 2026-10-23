@@ -1,0 +1,74 @@
+[gd_scene format=3 uid="uid://bg6pdutko2jlr"]
+
+[ext_resource type="Script" uid="uid://dxk6assni7hr3" path="res://Scripts/combat_ui.gd" id="1_h4xck"]
+
+[node name="CombatUI" type="CanvasLayer" unique_id=1033090851]
+script = ExtResource("1_h4xck")
+
+[node name="UIContainer" type="Control" parent="." unique_id=1893125676]
+layout_mode = 3
+anchors_preset = 10
+anchor_right = 1.0
+grow_horizontal = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="UIContainer" unique_id=1721085673]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="PlayerStats" type="VBoxContainer" parent="UIContainer/HBoxContainer" unique_id=1824832560]
+layout_mode = 2
+
+[node name="NameLabel" type="Label" parent="UIContainer/HBoxContainer/PlayerStats" unique_id=1803854181]
+layout_mode = 2
+
+[node name="HPLabel" type="Label" parent="UIContainer/HBoxContainer/PlayerStats" unique_id=1607298875]
+layout_mode = 2
+
+[node name="TypeLabel" type="Label" parent="UIContainer/HBoxContainer/PlayerStats" unique_id=754195861]
+layout_mode = 2
+
+[node name="DmgLabel" type="Label" parent="UIContainer/HBoxContainer/PlayerStats" unique_id=1869392681]
+layout_mode = 2
+
+[node name="MoveLabel" type="Label" parent="UIContainer/HBoxContainer/PlayerStats" unique_id=449897490]
+layout_mode = 2
+
+[node name="RangeLabel" type="Label" parent="UIContainer/HBoxContainer/PlayerStats" unique_id=1470727339]
+layout_mode = 2
+
+[node name="ArmorLabel" type="Label" parent="UIContainer/HBoxContainer/PlayerStats" unique_id=751082994]
+layout_mode = 2
+
+[node name="MRLabel" type="Label" parent="UIContainer/HBoxContainer/PlayerStats" unique_id=227297870]
+layout_mode = 2
+
+[node name="TargetStats" type="VBoxContainer" parent="UIContainer/HBoxContainer" unique_id=1506133656]
+layout_mode = 2
+
+[node name="NameLabel" type="Label" parent="UIContainer/HBoxContainer/TargetStats" unique_id=1933909149]
+layout_mode = 2
+
+[node name="HPLabel" type="Label" parent="UIContainer/HBoxContainer/TargetStats" unique_id=2124502407]
+layout_mode = 2
+
+[node name="TypeLabel" type="Label" parent="UIContainer/HBoxContainer/TargetStats" unique_id=1509876870]
+layout_mode = 2
+
+[node name="DmgLabel" type="Label" parent="UIContainer/HBoxContainer/TargetStats" unique_id=531436834]
+layout_mode = 2
+
+[node name="MoveLabel" type="Label" parent="UIContainer/HBoxContainer/TargetStats" unique_id=624736246]
+layout_mode = 2
+
+[node name="RangeLabel" type="Label" parent="UIContainer/HBoxContainer/TargetStats" unique_id=371950163]
+layout_mode = 2
+
+[node name="ArmorLabel" type="Label" parent="UIContainer/HBoxContainer/TargetStats" unique_id=501738718]
+layout_mode = 2
+
+[node name="MRLabel" type="Label" parent="UIContainer/HBoxContainer/TargetStats" unique_id=125839671]
+layout_mode = 2

@@ -4,9 +4,9 @@
 
 [node name="Character_card" type="VBoxContainer" unique_id=1270507088]
 offset_left = 37.0
-offset_top = 105.0
-offset_right = 334.0
-offset_bottom = 514.0
+offset_top = 37.000008
+offset_right = 342.0
+offset_bottom = 513.4694
 scale = Vector2(1, 1.0078639)
 script = ExtResource("1_3nck4")
 
@@ -30,6 +30,12 @@ layout_mode = 2
 layout_mode = 2
 
 [node name="RangeLabel" type="Label" parent="StatsContainer" unique_id=1638725263]
+layout_mode = 2
+
+[node name="ArmorLabel" type="Label" parent="StatsContainer" unique_id=1878278150]
+layout_mode = 2
+
+[node name="MagicLabel" type="Label" parent="StatsContainer" unique_id=2082474676]
 layout_mode = 2
 
 [node name="ButtonsContainer" type="HBoxContainer" parent="." unique_id=1810252982]

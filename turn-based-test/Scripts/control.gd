@@ -8,9 +8,6 @@ const CHARACTER_CARD_SCENE = preload("res://scenes/character_card.tscn")
 @onready var squad_button: Button = $VBoxContainer/HBoxContainer/SquadButton
 
 func _ready() -> void:
-	print(" DEBUG: _ready() called")
-	print("🔍 DEBUG: squad_button = ", squad_button)
-	print("🔍 DEBUG: card_container = ", card_container)
 	
 	if start_battle_button:
 		start_battle_button.pressed.connect(_on_start_battle_pressed)

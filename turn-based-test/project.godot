@@ -20,10 +20,12 @@ config/icon="res://icon.svg"
 SquadManager="*uid://dt1rwsh0d3f3d"
 
 [display]
-
 window/size/borderless=true
-window/stretch/mode="canvas_items"
-window/stretch/aspect="expand"
+window/size/viewport_width=1280
+window/size/viewport_height=720
+window/stretch/mode="viewport"
+window/stretch/aspect="keep"
+window/stretch/scale_mode="integer_scale"
 
 [input]
 

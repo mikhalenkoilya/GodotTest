@@ -211,9 +211,6 @@ animations = [{
 "speed": 14.0
 }]
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_08422"]
-size = Vector2(31, 31)
-
 [node name="Actor" type="CharacterBody2D" unique_id=1795983393]
 script = ExtResource("1_phrn4")
 
@@ -224,6 +221,4 @@ sprite_frames = SubResource("SpriteFrames_y7ccs")
 animation = &"death"
 autoplay = "idle"
 centered = false
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1626336945]
-shape = SubResource("RectangleShape2D_08422")
+flip_h = true

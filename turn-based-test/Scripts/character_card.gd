@@ -11,6 +11,8 @@ var slot_index: int = 0
 @onready var range_label = $StatsContainer/RangeLabel
 @onready var prev_button = $ButtonsContainer/PrevButton
 @onready var next_button = $ButtonsContainer/NextButton
+@onready var armor_label: Label = $StatsContainer/ArmorLabel
+@onready var magic_label: Label = $StatsContainer/MagicLabel
 
 func _ready() -> void:
 	# Только подключаем сигналы, UI обновим в setup()
@@ -24,11 +26,6 @@ func setup(index: int) -> void:
 	update_ui()
 
 func update_ui() -> void:
-	# Проверка на случай, если узлы не найдены
-	if class_name_label == null:
-		push_error("UI nodes not found! Check paths in @onready.")
-		return
-		
 	var class_data = SquadManager.get_class_data(slot_index)
 	if class_data:
 		class_name_label.text = class_data.display_name
@@ -42,6 +39,10 @@ func update_ui() -> void:
 		dmg_label.text = "⚔️ DMG: " + str(class_data.attack_damage)
 		move_label.text = " MOVE: " + str(class_data.move_range)
 		range_label.text = "🏹 RANGE: " + str(class_data.attack_range)
+		if armor_label:
+			armor_label.text = "🛡️ ARMOR: " + str(class_data.max_armor)
+		if magic_label:
+			magic_label.text = "✨ M.RES: " + str(class_data.max_magic_resist)		
 
 func _on_prev_pressed() -> void:
 	SquadManager.cycle_class(slot_index, -1)
