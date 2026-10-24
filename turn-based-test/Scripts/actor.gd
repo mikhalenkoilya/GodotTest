@@ -5,6 +5,7 @@ signal died(actor: Actor)
 
 @export var class_data: ClassData
 @export var is_friendly: bool = true
+@export var class_sprite_frames: SpriteFrames
 
 @onready var sprite: AnimatedSprite2D = $AnimatedSprite2D
 
@@ -33,6 +34,10 @@ var attack_type: ClassData.AttackType:
 	get: return class_data.attack_type if class_data else ClassData.AttackType.PHYSICAL
 
 func _ready() -> void:
+	# Apply custom class sprites if assigned
+	if class_sprite_frames:
+		sprite.sprite_frames = class_sprite_frames
+
 	current_health = max_health
 	current_armor = max_armor
 	current_magic_resist = max_magic_resist

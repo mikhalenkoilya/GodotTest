@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://2x70ne5ev21p"
-path="res://.godot/imported/Attack2.png-3d673ea908d65b3db803bfdff1930361.ctex"
+uid="uid://by81bj2ko02uj"
+path="res://.godot/imported/Attack.png-67348b63d5d9c4191d4c27f292e37af4.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://ART/Sprites/Attack2.png"
-dest_files=["res://.godot/imported/Attack2.png-3d673ea908d65b3db803bfdff1930361.ctex"]
+source_file="res://ART/Sprites/Huntress 2/Huntress 2/Sprites/Character/Attack.png"
+dest_files=["res://.godot/imported/Attack.png-67348b63d5d9c4191d4c27f292e37af4.ctex"]
 
 [params]
 

@@ -3,12 +3,15 @@
 [ext_resource type="Script" uid="uid://dxk6assni7hr3" path="res://Scripts/combat_ui.gd" id="1_h4xck"]
 
 [node name="CombatUI" type="CanvasLayer" unique_id=1033090851]
+layer = 0
 script = ExtResource("1_h4xck")
 
 [node name="UIContainer" type="Control" parent="." unique_id=1893125676]
 layout_mode = 3
 anchors_preset = 10
 anchor_right = 1.0
+offset_right = 8.0
+offset_bottom = 131.0
 grow_horizontal = 2
 
 [node name="HBoxContainer" type="HBoxContainer" parent="UIContainer" unique_id=1721085673]
@@ -16,6 +19,10 @@ layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+offset_left = 2.0
+offset_top = 29.0
+offset_right = -2.0
+offset_bottom = 110.0
 grow_horizontal = 2
 grow_vertical = 2
 

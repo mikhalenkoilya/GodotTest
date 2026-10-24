@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://cxk5kkogi543n"
-path="res://.godot/imported/Attack1.png-364824fbd606c9ec9290220d420e74e6.ctex"
+uid="uid://dkv605xdwaejt"
+path="res://.godot/imported/Idle.png-ed452bfa3a0c80f6292a3a0be8aace8a.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://ART/Sprites/Attack1.png"
-dest_files=["res://.godot/imported/Attack1.png-364824fbd606c9ec9290220d420e74e6.ctex"]
+source_file="res://ART/Sprites/Medieval King Pack 2/Medieval King Pack 2/Sprites/Idle.png"
+dest_files=["res://.godot/imported/Idle.png-ed452bfa3a0c80f6292a3a0be8aace8a.ctex"]
 
 [params]
 

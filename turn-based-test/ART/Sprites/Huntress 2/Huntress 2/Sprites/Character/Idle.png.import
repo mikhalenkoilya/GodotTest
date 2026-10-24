@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://c0tmv2djojkn8"
-path="res://.godot/imported/Jump.png-1429f0eefcb5eddf9a7b9397798e9f02.ctex"
+uid="uid://dqniq0acl6450"
+path="res://.godot/imported/Idle.png-361c86b46905740ee5456daa3803910e.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://ART/Sprites/Jump.png"
-dest_files=["res://.godot/imported/Jump.png-1429f0eefcb5eddf9a7b9397798e9f02.ctex"]
+source_file="res://ART/Sprites/Huntress 2/Huntress 2/Sprites/Character/Idle.png"
+dest_files=["res://.godot/imported/Idle.png-361c86b46905740ee5456daa3803910e.ctex"]
 
 [params]
 

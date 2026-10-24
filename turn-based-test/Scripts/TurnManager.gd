@@ -31,7 +31,7 @@ const ATTACK_ATLAS_COORDS = Vector2i(1, 0)
 var ui_layer: CanvasLayer = null
 var end_turn_button: Button = null
 
-@onready var combat_ui: Node = $CombatUI
+@onready var combat_ui: Node = $"../../CombatUI"
 
 func _ready() -> void:
 	if Engine.is_editor_hint(): return
@@ -46,7 +46,12 @@ func _ready() -> void:
 	for child in get_children():
 		if child is Actor:
 			register_actor(child)
-
+	print("CombatUI reference: ", combat_ui)
+	if combat_ui:
+			print("✅ CombatUI found!")
+	else:
+		print("❌ CombatUI is NULL - check the path!")
+		
 func register_actor(actor: Actor) -> void:
 	if actor.is_friendly:
 		friendly_actors.append(actor)

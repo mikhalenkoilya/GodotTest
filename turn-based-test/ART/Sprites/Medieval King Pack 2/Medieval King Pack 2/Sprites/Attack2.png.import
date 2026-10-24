@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://brugbyd7l6053"
-path="res://.godot/imported/Take Hit - white silhouette.png-54004625142c0315dc1da29ca72f1f92.ctex"
+uid="uid://c3t5jpdw04bsu"
+path="res://.godot/imported/Attack2.png-9b83add86ea7a5095a022176d8d08b7e.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://ART/Sprites/Take Hit - white silhouette.png"
-dest_files=["res://.godot/imported/Take Hit - white silhouette.png-54004625142c0315dc1da29ca72f1f92.ctex"]
+source_file="res://ART/Sprites/Medieval King Pack 2/Medieval King Pack 2/Sprites/Attack2.png"
+dest_files=["res://.godot/imported/Attack2.png-9b83add86ea7a5095a022176d8d08b7e.ctex"]
 
 [params]
 

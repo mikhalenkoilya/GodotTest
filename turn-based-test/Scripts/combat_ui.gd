@@ -39,7 +39,7 @@ func update_target_stats(actor: Actor) -> void:
 	target_mr.text = "✨ M.Res: %d/%d" % [actor.current_magic_resist, actor.max_magic_resist]
 	target_dmg.text = "⚔️ DMG: %d" % actor.attack_damage
 	target_type.text = "🔮 Type: " + ("Physical" if actor.attack_type == ClassData.AttackType.PHYSICAL else "Magic")
-	target_move.text = " Move: %d" % (actor.class_data.move_range if actor.class_data else 0)
+	target_move.text = "👟 Move: %d" % (actor.class_data.move_range if actor.class_data else 0)
 	target_range.text = "🎯 Range: %d" % (actor.class_data.attack_range if actor.class_data else 0)
 
 func clear_target_stats() -> void:

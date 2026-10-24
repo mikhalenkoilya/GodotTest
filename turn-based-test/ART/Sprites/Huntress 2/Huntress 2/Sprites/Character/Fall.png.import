@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://drj3l4br73wx1"
-path="res://.godot/imported/Attack4.png-8269f30da9085373c425d100d35daf39.ctex"
+uid="uid://ciefm7scs0j4q"
+path="res://.godot/imported/Fall.png-915f09c3e9aa7a7f811c5ecd6c2e3496.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://ART/Sprites/Attack4.png"
-dest_files=["res://.godot/imported/Attack4.png-8269f30da9085373c425d100d35daf39.ctex"]
+source_file="res://ART/Sprites/Huntress 2/Huntress 2/Sprites/Character/Fall.png"
+dest_files=["res://.godot/imported/Fall.png-915f09c3e9aa7a7f811c5ecd6c2e3496.ctex"]
 
 [params]
 

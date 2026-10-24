@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://citfe4hlrbxoq"
-path="res://.godot/imported/Run.png-1e00e69e786afde2d3403b99b36a3349.ctex"
+uid="uid://28qxw01odlyu"
+path="res://.godot/imported/Preview.png-b0e9fcc7f74ce7ba1c593137f0a7c69f.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://ART/Sprites/Run.png"
-dest_files=["res://.godot/imported/Run.png-1e00e69e786afde2d3403b99b36a3349.ctex"]
+source_file="res://ART/Sprites/Huntress 2/Huntress 2/Preview.png"
+dest_files=["res://.godot/imported/Preview.png-b0e9fcc7f74ce7ba1c593137f0a7c69f.ctex"]
 
 [params]
 

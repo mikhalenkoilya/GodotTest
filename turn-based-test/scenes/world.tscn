@@ -7,9 +7,9 @@
 [ext_resource type="Texture2D" uid="uid://vx7w320r13et" path="res://ART/Tilemap/blue&red.png" id="3_71j4m"]
 [ext_resource type="Texture2D" uid="uid://bh5dqay47wguy" path="res://ART/Tilemap/grid.png" id="4_4mrxx"]
 [ext_resource type="Script" uid="uid://qefyhqelaun" path="res://Scripts/TurnManager.gd" id="6_4mrxx"]
-[ext_resource type="Resource" uid="uid://drjimrgwv4ygu" path="res://data/classes/mage.tres" id="7_4mrxx"]
 [ext_resource type="PackedScene" uid="uid://2vq8jc5hcuwy" path="res://scenes/actor_player.tscn" id="7_o8fc1"]
-[ext_resource type="Resource" uid="uid://y4u1833v0qip" path="res://data/classes/warrior.tres" id="8_7r4gi"]
+[ext_resource type="Script" uid="uid://b217idjjy25pn" path="res://Scripts/class_data.gd" id="9_e3hyu"]
+[ext_resource type="SpriteFrames" uid="uid://dw1e26qqj12d6" path="res://ART/Sprites/Animations/warrior_sptires.res" id="10_q5onr"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_e3hyu"]
 texture = ExtResource("3_7r4gi")
@@ -102,6 +102,23 @@ texture_region_size = Vector2i(32, 32)
 tile_size = Vector2i(32, 32)
 sources/1 = SubResource("TileSetAtlasSource_w7kh3")
 
+[sub_resource type="Resource" id="Resource_y7ccs"]
+script = ExtResource("9_e3hyu")
+attack_range = 2
+metadata/_custom_type_script = "uid://b217idjjy25pn"
+
+[sub_resource type="Resource" id="Resource_phrn4"]
+script = ExtResource("9_e3hyu")
+metadata/_custom_type_script = "uid://b217idjjy25pn"
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_3lhv1"]
+
+[sub_resource type="Resource" id="Resource_x2hk4"]
+script = ExtResource("9_e3hyu")
+metadata/_custom_type_script = "uid://b217idjjy25pn"
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_loxae"]
+
 [node name="World" type="Node2D" unique_id=434652317]
 position = Vector2(1, 0)
 script = ExtResource("1_4mrxx")
@@ -130,19 +147,22 @@ script = ExtResource("6_4mrxx")
 metadata/_custom_type_script = "uid://qefyhqelaun"
 
 [node name="ActorEnemy" parent="Tiles/TurnManager" unique_id=603810021 instance=ExtResource("7_o8fc1")]
-position = Vector2(239, 49)
-class_data = ExtResource("8_7r4gi")
+position = Vector2(207, 48)
+class_data = SubResource("Resource_y7ccs")
 is_friendly = false
+class_sprite_frames = ExtResource("10_q5onr")
 
 [node name="ActorEnemy2" parent="Tiles/TurnManager" unique_id=1790968418 instance=ExtResource("7_o8fc1")]
-position = Vector2(240, 121)
-class_data = ExtResource("7_4mrxx")
+position = Vector2(208, 112)
+class_data = SubResource("Resource_phrn4")
 is_friendly = false
+class_sprite_frames = SubResource("SpriteFrames_3lhv1")
 
 [node name="ActorEnemy3" parent="Tiles/TurnManager" unique_id=1326721702 instance=ExtResource("7_o8fc1")]
-position = Vector2(242, 172)
-class_data = ExtResource("8_7r4gi")
+position = Vector2(208, 176)
+class_data = SubResource("Resource_x2hk4")
 is_friendly = false
+class_sprite_frames = SubResource("SpriteFrames_loxae")
 
 [node name="SpawnPoint_0" type="Marker2D" parent="." unique_id=1609851194]
 position = Vector2(10, 49)

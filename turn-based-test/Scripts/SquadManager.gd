@@ -17,7 +17,8 @@ func remove_from_squad(actor: Actor) -> void:
 var available_classes: Array[String] = [
 	"res://data/classes/warrior.tres",
 	"res://data/classes/archer.tres",
-	"res://data/classes/mage.tres"
+	"res://data/classes/mage.tres",
+	"res://data/classes/ninja.tres"
 ]
 
 # Default squad composition

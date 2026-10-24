@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://deui1eg7j22bq"
-path="res://.godot/imported/Take Hit.png-0c2fb01166cafc881ffa686c92debcbb.ctex"
+uid="uid://citfe4hlrbxoq"
+path="res://.godot/imported/Run.png-0ab54d4ba57f410c665adea69dbf3288.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://ART/Sprites/Take Hit.png"
-dest_files=["res://.godot/imported/Take Hit.png-0c2fb01166cafc881ffa686c92debcbb.ctex"]
+source_file="res://ART/Sprites/squire/Run.png"
+dest_files=["res://.godot/imported/Run.png-0ab54d4ba57f410c665adea69dbf3288.ctex"]
 
 [params]
 
