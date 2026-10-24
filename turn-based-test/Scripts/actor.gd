@@ -34,13 +34,13 @@ var attack_type: ClassData.AttackType:
 	get: return class_data.attack_type if class_data else ClassData.AttackType.PHYSICAL
 
 func _ready() -> void:
-	# Apply custom class sprites if assigned
-	if class_sprite_frames:
-		sprite.sprite_frames = class_sprite_frames
-
 	current_health = max_health
 	current_armor = max_armor
 	current_magic_resist = max_magic_resist
+	
+	# Apply class-specific sprite frames if available
+	if class_data and class_data.sprite_frames:
+		sprite.sprite_frames = class_data.sprite_frames
 	
 	_update_visuals()
 	if sprite and not sprite.is_playing():

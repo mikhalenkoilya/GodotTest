@@ -1,10 +1,12 @@
 [gd_resource type="Resource" script_class="ClassData" format=3 uid="uid://dt7fxegdwkj0h"]
 
 [ext_resource type="Script" uid="uid://b217idjjy25pn" path="res://Scripts/class_data.gd" id="1_ay7f7"]
+[ext_resource type="SpriteFrames" uid="uid://b3jyfru03bc16" path="res://ART/Sprites/Animations/ninja.res" id="2_cca31"]
 
 [resource]
 script = ExtResource("1_ay7f7")
 display_name = "Ниндзя"
 max_hp = 70
 attack_range = 2
+sprite_frames = ExtResource("2_cca31")
 metadata/_custom_type_script = "uid://b217idjjy25pn"
