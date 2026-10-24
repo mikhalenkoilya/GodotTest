@@ -1,8 +1,8 @@
 [gd_scene format=4 uid="uid://bmqirhnkki5s"]
 
 [ext_resource type="Script" uid="uid://clhvvs4m7est4" path="res://Scripts/world.gd" id="1_4mrxx"]
-[ext_resource type="PackedScene" uid="uid://bg6pdutko2jlr" path="res://data/classes/CombatUI.tscn" id="2_e3hyu"]
-[ext_resource type="Script" uid="uid://cpgqxjldxpy06" path="res://scenes/camera_2d.gd" id="2_w7kh3"]
+[ext_resource type="PackedScene" uid="uid://bg6pdutko2jlr" path="res://scenes/CombatUI.tscn" id="2_e3hyu"]
+[ext_resource type="Script" uid="uid://cpgqxjldxpy06" path="res://Scripts/camera_2d.gd" id="2_w7kh3"]
 [ext_resource type="Texture2D" uid="uid://ivrjq4n4ckac" path="res://ART/Pixel Art Top Down - Basic v1.2.3/Texture/TX Tileset Grass.png" id="3_7r4gi"]
 [ext_resource type="Texture2D" uid="uid://vx7w320r13et" path="res://ART/Tilemap/blue&red.png" id="3_71j4m"]
 [ext_resource type="Texture2D" uid="uid://bh5dqay47wguy" path="res://ART/Tilemap/grid.png" id="4_4mrxx"]
