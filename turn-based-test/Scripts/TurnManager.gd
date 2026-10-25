@@ -15,6 +15,8 @@ var friendly_remaining_moves: Array[Actor] = []
 var selected_actor: Actor = null
 var actor_start_global_pos: Vector2 = Vector2.ZERO
 
+var reachable_cells: Dictionary = {}
+
 enum Turn { USER, AI }
 var current_turn: Turn = Turn.USER
 
@@ -31,27 +33,29 @@ const ATTACK_ATLAS_COORDS = Vector2i(1, 0)
 var ui_layer: CanvasLayer = null
 var end_turn_button: Button = null
 
-@onready var combat_ui: Node = $"../../CombatUI"
+# FIX 2: Use correct path to CombatUI (sibling of Tiles, not child of TurnManager)
+@onready var combat_ui: Node = get_node_or_null("../CombatUI")
 
 func _ready() -> void:
 	if Engine.is_editor_hint(): return
 	
-	# Direct, fast references based on world.tscn structure
 	tile_map = get_parent() as TileMapLayer
 	grid_layer = tile_map.get_node_or_null("GridLayer") as TileMapLayer
 	
+	# Fallback: search for CombatUI if the path above fails
+	if not combat_ui:
+		combat_ui = get_tree().root.find_child("CombatUI", true, false)
+		if combat_ui:
+			print("✅ Found CombatUI via search: ", combat_ui.get_path())
+		else:
+			print("⚠️ CombatUI not found in scene tree!")
+	
 	_create_end_turn_button()
 	
-	# Auto-register pre-placed actors (e.g., enemies in the scene)
 	for child in get_children():
 		if child is Actor:
 			register_actor(child)
-	print("CombatUI reference: ", combat_ui)
-	if combat_ui:
-			print("✅ CombatUI found!")
-	else:
-		print("❌ CombatUI is NULL - check the path!")
-		
+
 func register_actor(actor: Actor) -> void:
 	if actor.is_friendly:
 		friendly_actors.append(actor)
@@ -60,22 +64,14 @@ func register_actor(actor: Actor) -> void:
 	actor.died.connect(_on_actor_died)
 
 func _on_actor_died(actor: Actor) -> void:
-	# Удаляем из массивов
 	friendly_actors.erase(actor)
 	enemy_actors.erase(actor)
 	friendly_remaining_moves.erase(actor)
 	
-	# Сбрасываем выбор, если умер выбранный персонаж
 	if selected_actor == actor:
 		selected_actor = null
 		_clear_highlight()
 		current_phase = Phase.MOVE
-	
-	# Физически удаляем узел со сцены
-	actor.queue_free()
-	
-	# Проверяем условия победы
-	_check_win_conditions()
 	
 	actor.queue_free()
 	_check_win_conditions()
@@ -114,7 +110,6 @@ func _input(event: InputEvent) -> void:
 
 func _cancel_current_action() -> void:
 	if current_phase == Phase.ATTACK and selected_actor != null:
-		print("↩️ Ход отменен. Боец возвращается на исходную позицию.")
 		selected_actor.global_position = actor_start_global_pos
 	
 	selected_actor = null
@@ -130,17 +125,21 @@ func _handle_left_click(target_cell: Vector2i) -> void:
 			actor_start_global_pos = selected_actor.global_position
 			_highlight_available_moves(selected_actor)
 			
-			# NEW: Update Player UI
 			if combat_ui: combat_ui.update_player_stats(selected_actor)
 			return
 			
 		if selected_actor:
-			if target_cell in highlighted_cells:
+			# FIX 1: Check reachable_cells BEFORE clearing highlights
+			if target_cell in reachable_cells:
 				is_processing_move = true
-				_clear_highlight()
 				var move_success = await _try_move_actor(selected_actor, target_cell)
 				is_processing_move = false
-				if move_success: _switch_to_attack_phase()
+				_clear_highlight() # NOW clear after move attempt
+				if move_success: 
+					_switch_to_attack_phase()
+				else:
+					# Move failed, re-highlight
+					_highlight_available_moves(selected_actor)
 			else:
 				_switch_to_attack_phase()
 				
@@ -153,7 +152,15 @@ func _handle_left_click(target_cell: Vector2i) -> void:
 			
 		var target_enemy = _get_actor_at_cell(target_cell, enemy_actors)
 		if target_enemy:
-			target_enemy.take_damage(selected_actor.attack_damage, selected_actor.attack_type)
+			# FIX: Store in a local variable before awaiting
+			var attacker = selected_actor
+			
+			await attacker.perform_attack()
+			
+			# FIX: Check if both actors still exist after the animation finishes
+			if is_instance_valid(attacker) and is_instance_valid(target_enemy):
+				target_enemy.take_damage(attacker.attack_damage, attacker.attack_type)
+				
 			_complete_actor_turn()
 
 func _switch_to_attack_phase() -> void:
@@ -171,12 +178,9 @@ func _complete_actor_turn() -> void:
 	if friendly_remaining_moves.is_empty():
 		await _end_user_turn()
 
-func _on_end_turn_button_pressed() -> void: # <-- CRITICAL BUG FIXED
+func _on_end_turn_button_pressed() -> void:
 	if current_turn != Turn.USER or is_processing_move: return
 	
-	print("🏁 Игрок завершил ход досрочно.")
-	
-	# Revert position BEFORE clearing selected_actor
 	if selected_actor != null and current_phase == Phase.ATTACK:
 		selected_actor.global_position = actor_start_global_pos
 	
@@ -210,44 +214,41 @@ func _make_ai_moves_and_attacks() -> void:
 
 		if total_distance > attack_range:
 			var move_range = enemy.class_data.move_range if enemy.class_data else 3
-			var desired_move_distance = mini(total_distance - attack_range, move_range)
 			
-			var step_x = sign(user_cell.x - ai_cell.x)
-			var step_y = sign(user_cell.y - ai_cell.y)
+			# FIX 3: Removed unused is_ai parameter
+			var ai_reachable = _calculate_reachable_cells(ai_cell, move_range)
 			
 			var best_cell = ai_cell
-			var min_dist_to_target = total_distance
+			var best_distance = total_distance
 			
-			var candidates = []
-			if abs(user_cell.x - ai_cell.x) >= abs(user_cell.y - ai_cell.y):
-				if step_x != 0: candidates.append(ai_cell + Vector2i(step_x, 0))
-				if step_y != 0: candidates.append(ai_cell + Vector2i(0, step_y))
-			else:
-				if step_y != 0: candidates.append(ai_cell + Vector2i(0, step_y))
-				if step_x != 0: candidates.append(ai_cell + Vector2i(step_x, 0))
-				
-			for candidate in candidates:
-				if not _is_cell_occupied(candidate):
-					var dist = abs(user_cell.x - candidate.x) + abs(user_cell.y - candidate.y)
-					if dist < min_dist_to_target:
-						min_dist_to_target = dist
-						best_cell = candidate
-						
+			for cell in ai_reachable:
+				var dist = abs(user_cell.x - cell.x) + abs(user_cell.y - cell.y)
+				if dist < best_distance:
+					best_distance = dist
+					best_cell = cell
+			
 			if best_cell != ai_cell:
-				await _try_move_actor(enemy, best_cell)
+				print("🤖 %s moving to %s" % [enemy.name, best_cell])
+				await _try_move_actor_direct(enemy, best_cell)
 				ai_cell = tile_map.local_to_map(tile_map.to_local(enemy.global_position))
 		
+		# Attack after moving
 		user_cell = tile_map.local_to_map(tile_map.to_local(target_player.global_position))
 		var final_dist = abs(user_cell.x - ai_cell.x) + abs(user_cell.y - ai_cell.y)
 		
 		if final_dist <= attack_range:
 			print("🤖 %s наносит удар по %s" % [enemy.name, target_player.name])
-			await get_tree().create_timer(0.2).timeout
-			target_player.take_damage(enemy.attack_damage, enemy.attack_type)
 			
-		await get_tree().create_timer(0.3).timeout
-		
-	_start_new_round()
+			# FIX: Store in local variables
+			var attacker = enemy
+			var target = target_player
+			
+			await attacker.perform_attack()
+			await get_tree().create_timer(0.2).timeout
+			
+			# FIX: Check if both still exist
+			if is_instance_valid(attacker) and is_instance_valid(target):
+				target.take_damage(attacker.attack_damage, attacker.attack_type)
 
 func _find_closest_friendly(enemy: Actor) -> Actor:
 	var closest: Actor = null
@@ -271,20 +272,58 @@ func _check_win_conditions() -> void:
 	elif live_enemies.is_empty():
 		game_over.emit(true)
 
-# --- Helper functions (kept from original, slightly cleaned) ---
+func _get_tile_cost(cell: Vector2i) -> int:
+	if not tile_map: return 1
+	var tile_data = tile_map.get_cell_tile_data(cell)
+	if not tile_data: return 1
+	
+	var cost = tile_data.get_custom_data("move_cost")
+	if cost <= 0: 
+		return 9999
+	return cost
+
+func _calculate_reachable_cells(start_cell: Vector2i, max_cost: int) -> Dictionary:
+	var reachable = {}
+	var queue = [[start_cell, 0]]
+	reachable[start_cell] = 0
+
+	while not queue.is_empty():
+		var current = queue.pop_front()
+		var cell: Vector2i = current[0]
+		var cost: int = current[1]
+
+		var neighbors = [
+			cell + Vector2i(1, 0), cell + Vector2i(-1, 0),
+			cell + Vector2i(0, 1), cell + Vector2i(0, -1)
+		]
+
+		for n in neighbors:
+			if reachable.has(n): continue
+			
+			var tile_cost = _get_tile_cost(n)
+			if tile_cost >= 9999: continue
+			
+			if _is_cell_occupied(n): continue
+
+			var new_cost = cost + tile_cost
+			if new_cost <= max_cost:
+				reachable[n] = new_cost
+				queue.append([n, new_cost])
+
+	reachable.erase(start_cell)
+	return reachable
+
 func _highlight_available_moves(actor: Actor) -> void:
 	_clear_highlight()
 	var actor_cell = tile_map.local_to_map(tile_map.to_local(actor.global_position))
-	var source_id = _get_valid_source_id()
 	var move_range = actor.class_data.move_range if actor.class_data else 3
+	var source_id = _get_valid_source_id()
 	
-	for x in range(-move_range, move_range + 1):
-		for y in range(-move_range, move_range + 1):
-			var check_cell = actor_cell + Vector2i(x, y)
-			var distance = abs(x) + abs(y)
-			if distance <= move_range and distance > 0 and not _is_cell_occupied(check_cell):
-				grid_layer.set_cell(check_cell, source_id, HIGHLIGHT_ATLAS_COORDS)
-				highlighted_cells.append(check_cell)
+	reachable_cells = _calculate_reachable_cells(actor_cell, move_range)
+	
+	for cell in reachable_cells:
+		grid_layer.set_cell(cell, source_id, HIGHLIGHT_ATLAS_COORDS)
+		highlighted_cells.append(cell)
 
 func _highlight_attack_range(actor: Actor) -> void:
 	_clear_highlight()
@@ -305,18 +344,26 @@ func _clear_highlight() -> void:
 	for cell in highlighted_cells:
 		grid_layer.set_cell(cell, -1, Vector2i(-1, -1))
 	highlighted_cells.clear()
+	# FIX 1: Don't clear reachable_cells here - it's needed for movement validation
+	# reachable_cells.clear() # REMOVED - now cleared in _complete_actor_turn and _start_new_round
 
 func _try_move_actor(actor: Actor, target_cell: Vector2i) -> bool:
 	if _is_cell_occupied(target_cell): return false
-	var current_cell = tile_map.local_to_map(tile_map.to_local(actor.global_position))
-	var move_range = actor.class_data.move_range if actor.class_data else 3
-	var distance = abs(target_cell.x - current_cell.x) + abs(target_cell.y - current_cell.y)
 	
-	if distance <= move_range and distance > 0:
-		var target_global_pos = tile_map.to_global(tile_map.map_to_local(target_cell))
-		await actor.move_to(target_global_pos)
-		return true
-	return false
+	if not reachable_cells.has(target_cell): 
+		return false 
+		
+	var target_global_pos = tile_map.to_global(tile_map.map_to_local(target_cell))
+	await actor.move_to(target_global_pos)
+	return true
+
+# NEW: Direct move for AI (bypasses reachable_cells check since AI calculates its own)
+func _try_move_actor_direct(actor: Actor, target_cell: Vector2i) -> bool:
+	if _is_cell_occupied(target_cell): return false
+	
+	var target_global_pos = tile_map.to_global(tile_map.map_to_local(target_cell))
+	await actor.move_to(target_global_pos)
+	return true
 
 func _is_cell_occupied(cell: Vector2i) -> bool:
 	for actor in friendly_actors + enemy_actors:
@@ -365,7 +412,6 @@ func _update_hover_stats() -> void:
 	var local_mouse_pos = tile_map.get_local_mouse_position()
 	var target_cell = tile_map.local_to_map(local_mouse_pos)
 	
-	# Check if mouse is over any actor
 	var hovered_actor = _get_actor_at_cell(target_cell, friendly_actors + enemy_actors)
 	
 	if combat_ui:

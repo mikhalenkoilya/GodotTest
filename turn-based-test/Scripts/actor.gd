@@ -17,7 +17,6 @@ var is_dead: bool = false
 const FRIENDLY_COLOR = Color(0.35, 0.75, 1.0)
 const ENEMY_COLOR = Color(1.0, 0.35, 0.35)
 
-# Computed properties (правильный синтаксис с отступом)
 var max_health: int:
 	get: return class_data.max_hp if class_data else 100
 
@@ -34,16 +33,26 @@ var attack_type: ClassData.AttackType:
 	get: return class_data.attack_type if class_data else ClassData.AttackType.PHYSICAL
 
 func _ready() -> void:
+	if not class_data:
+		push_warning("⚠️ Actor '%s' is missing Class Data assignment in the Inspector! Defaulting to base stats." % name)
+	
 	current_health = max_health
 	current_armor = max_armor
 	current_magic_resist = max_magic_resist
 	
-	# Apply class-specific sprite frames if available
-	if class_data and class_data.sprite_frames:
-		sprite.sprite_frames = class_data.sprite_frames
-	
 	_update_visuals()
 	if sprite and not sprite.is_playing():
+		sprite.play("idle")
+		
+# NEW: Attack animation function
+func perform_attack() -> void:
+	if is_dead: return
+	
+	if sprite and sprite.sprite_frames.has_animation("attack"):
+		sprite.play("attack")
+		await sprite.animation_finished
+	
+	if not is_dead and sprite:
 		sprite.play("idle")
 
 func take_damage(amount: int, type: ClassData.AttackType) -> void:

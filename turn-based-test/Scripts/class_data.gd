@@ -10,7 +10,7 @@ enum AttackType { PHYSICAL, MAGIC }
 @export var move_range: int = 3
 @export var attack_range: int = 1
 @export var sprite_texture: Texture2D
-@export var sprite_frames: SpriteFrames # <-- ADD THIS LINE
+@export var sprite_frames: SpriteFrames 
 
 # New Combat Stats
 @export var attack_type: AttackType = AttackType.PHYSICAL

@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://2vq8jc5hcuwy"]
 
 [ext_resource type="Script" uid="uid://dkjfll8vf36rp" path="res://Scripts/actor.gd" id="1_phrn4"]
-[ext_resource type="SpriteFrames" uid="uid://bpim7a2t6xwvj" path="res://ART/Sprites/Animations/mage.res" id="2_phrn4"]
+[ext_resource type="SpriteFrames" uid="uid://bywsnduprwm76" path="res://data/abilities/warrior.res" id="2_phrn4"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_2but5"]
 size = Vector2(32, 32)
@@ -10,10 +10,12 @@ size = Vector2(32, 32)
 script = ExtResource("1_phrn4")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=313402948]
-position = Vector2(-46.999996, -39)
-scale = Vector2(0.48051944, 0.38947368)
+position = Vector2(-63.000004, -55)
+scale = Vector2(0.8999999, 0.7533333)
 sprite_frames = ExtResource("2_phrn4")
-animation = &"hit"
+animation = &"attack"
+frame = 3
+frame_progress = 1.0
 centered = false
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=121140727]
