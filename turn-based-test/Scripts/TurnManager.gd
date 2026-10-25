@@ -32,6 +32,14 @@ const ATTACK_ATLAS_COORDS = Vector2i(1, 0)
 
 var ui_layer: CanvasLayer = null
 var end_turn_button: Button = null
+# ✅ NEW: Custom attack cursors based on damage type
+# Create these files in res://ART/cursors/ (or change the paths to match your project)
+const CURSOR_SWORD = preload("res://ART/cursors/sword.png")      # Physical damage
+const CURSOR_MAGIC = preload("res://ART/cursors/wand.png")      # Magic damage
+const CURSOR_DEFAULT = preload("res://ART/cursors/arrow.png")  # Normal arrow (optional fallback)
+
+# Hotspot = the "tip" of the cursor (where clicks register). Center of a 32x32 image = Vector2(16, 16)
+const CURSOR_HOTSPOT = Vector2(16, 16)
 
 # FIX 2: Use correct path to CombatUI (sibling of Tiles, not child of TurnManager)
 @onready var combat_ui: Node = get_node_or_null("../CombatUI")
@@ -92,7 +100,20 @@ func _start_new_round() -> void:
 func _input(event: InputEvent) -> void:
 	if event is InputEventMouseMotion:
 		_update_hover_stats()
+		
+		# ✅ NEW: Update cursor while moving the mouse
+		if current_turn == Turn.USER and tile_map:
+			var target_cell = tile_map.local_to_map(tile_map.get_local_mouse_position())
+			_update_attack_cursor(target_cell)
 		return
+		
+	# ✅ FIX: Spacebar ONLY ends the currently selected character's turn
+	if event is InputEventKey and event.pressed and not event.is_echo():
+		if event.keycode == KEY_SPACE:
+			if current_turn == Turn.USER and not is_processing_move and selected_actor != null:
+				_complete_actor_turn() # Ends ONLY this character's turn
+			return
+			
 	if event.is_action_pressed("end_turn"):
 		_on_end_turn_button_pressed()
 		return
@@ -115,6 +136,9 @@ func _cancel_current_action() -> void:
 	selected_actor = null
 	_clear_highlight()
 	current_phase = Phase.MOVE
+	
+	# ✅ Reset cursor when canceling (right-click)
+	Input.set_custom_mouse_cursor(CURSOR_DEFAULT, Input.CURSOR_ARROW, CURSOR_HOTSPOT)
 
 func _handle_left_click(target_cell: Vector2i) -> void:
 	if current_phase == Phase.MOVE:
@@ -152,14 +176,14 @@ func _handle_left_click(target_cell: Vector2i) -> void:
 			
 		var target_enemy = _get_actor_at_cell(target_cell, enemy_actors)
 		if target_enemy:
-			# FIX: Store in a local variable before awaiting
 			var attacker = selected_actor
+			var target = target_enemy # ✅ Store target reference
 			
-			await attacker.perform_attack()
+			# ✅ Pass the target to perform_attack for the offset lunge
+			await attacker.perform_attack(target)
 			
-			# FIX: Check if both actors still exist after the animation finishes
-			if is_instance_valid(attacker) and is_instance_valid(target_enemy):
-				target_enemy.take_damage(attacker.attack_damage, attacker.attack_type)
+			if is_instance_valid(attacker) and is_instance_valid(target):
+				target.take_damage(attacker.attack_damage, attacker.attack_type)
 				
 			_complete_actor_turn()
 
@@ -174,6 +198,9 @@ func _complete_actor_turn() -> void:
 	selected_actor = null
 	_clear_highlight()
 	current_phase = Phase.MOVE
+	
+	# ✅ Reset cursor when finishing a character's turn
+	Input.set_custom_mouse_cursor(CURSOR_DEFAULT, Input.CURSOR_ARROW, CURSOR_HOTSPOT)
 	
 	if friendly_remaining_moves.is_empty():
 		await _end_user_turn()
@@ -196,6 +223,9 @@ func _end_user_turn() -> void:
 	_clear_highlight()
 	await get_tree().create_timer(0.4).timeout
 	await _make_ai_moves_and_attacks()
+	
+	# ✅ FIX: Transition back to player's turn after AI finishes all actions
+	_start_new_round()
 
 func _make_ai_moves_and_attacks() -> void:
 	var active_enemies = enemy_actors.filter(func(e): return is_instance_valid(e) and not e.is_dead)
@@ -239,15 +269,14 @@ func _make_ai_moves_and_attacks() -> void:
 		if final_dist <= attack_range:
 			print("🤖 %s наносит удар по %s" % [enemy.name, target_player.name])
 			
-			# FIX: Store in local variables
 			var attacker = enemy
-			var target = target_player
+			var target = target_player # ✅ Store target reference
 			
-			await attacker.perform_attack()
+			# ✅ Pass the target to perform_attack for the offset lunge
+			await attacker.perform_attack(target)
 			await get_tree().create_timer(0.2).timeout
 			
-			# FIX: Check if both still exist
-			if is_instance_valid(attacker) and is_instance_valid(target):
+			if is_instance_valid(attacker) and is_instance_valid(target) and not target.is_dead:
 				target.take_damage(attacker.attack_damage, attacker.attack_type)
 
 func _find_closest_friendly(enemy: Actor) -> Actor:
@@ -419,3 +448,23 @@ func _update_hover_stats() -> void:
 			combat_ui.update_target_stats(hovered_actor)
 		else:
 			combat_ui.clear_target_stats()
+# ✅ NEW: Dynamically change the mouse cursor based on attack type & target validity
+func _update_attack_cursor(target_cell: Vector2i) -> void:
+	if current_phase != Phase.ATTACK or not selected_actor:
+		# Reset to default cursor when not attacking
+		Input.set_custom_mouse_cursor(CURSOR_DEFAULT, Input.CURSOR_ARROW, CURSOR_HOTSPOT)
+		return
+	
+	# Check if hovering over a valid enemy target
+	var target_enemy = _get_actor_at_cell(target_cell, enemy_actors)
+	var is_valid_target = target_enemy != null and target_cell in highlighted_cells
+	
+	if is_valid_target:
+		# ✅ Show attack-type-specific cursor
+		if selected_actor.attack_type == ClassData.AttackType.PHYSICAL:
+			Input.set_custom_mouse_cursor(CURSOR_SWORD, Input.CURSOR_ARROW, CURSOR_HOTSPOT)
+		else:
+			Input.set_custom_mouse_cursor(CURSOR_MAGIC, Input.CURSOR_ARROW, CURSOR_HOTSPOT)
+	else:
+		# Hovering over empty/invalid cell during attack phase -> show a "blocked" or default cursor
+		Input.set_custom_mouse_cursor(CURSOR_DEFAULT, Input.CURSOR_ARROW, CURSOR_HOTSPOT)

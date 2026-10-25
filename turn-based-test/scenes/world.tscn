@@ -406,13 +406,13 @@ script = ExtResource("6_4mrxx")
 metadata/_custom_type_script = "uid://qefyhqelaun"
 
 [node name="SpawnPoint_0" type="Marker2D" parent="." unique_id=1609851194]
-position = Vector2(10, 49)
+position = Vector2(175, 80)
 
 [node name="SpawnPoint_1" type="Marker2D" parent="." unique_id=1088444596]
-position = Vector2(13, 115)
+position = Vector2(175, 112)
 
 [node name="SpawnPoint_2" type="Marker2D" parent="." unique_id=875338141]
-position = Vector2(16, 174)
+position = Vector2(175, 176)
 
 [node name="EnemySpawnPoint_0" type="Marker2D" parent="." unique_id=1192132513]
 position = Vector2(239, 48)

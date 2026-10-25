@@ -10,6 +10,6 @@ attack_damage = 25
 move_range = 2
 attack_range = 1
 sprite_frames = ExtResource("2_agnmr")
-attack_type = 1
+attack_type = 0
 max_armor = 10
 max_magic_resist = 15

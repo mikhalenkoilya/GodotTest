@@ -45,13 +45,32 @@ func _ready() -> void:
 		sprite.play("idle")
 		
 # NEW: Attack animation function
-func perform_attack() -> void:
+func perform_attack(target: Node2D = null) -> void:
 	if is_dead: return
 	
-	if sprite and sprite.sprite_frames.has_animation("attack"):
+	var original_pos = global_position
+	var offset_applied = false
+	
+	# ✅ NEW: Apply 50% offset lunge if attacking at range 1
+	if target and is_instance_valid(target) and class_data and class_data.attack_range == 1:
+		var direction = (target.global_position - global_position).normalized()
+		# 32.0 is 50% of a standard 64x64 tile. 
+		# Adjust this value if your project uses a different tile size (e.g., 48.0 for 96x96 tiles)
+		var lunge_distance = 16.0
+		global_position += direction * lunge_distance
+		offset_applied = true
+		
+	if sprite:
 		sprite.play("attack")
 		await sprite.animation_finished
-	
+		
+	# ✅ Smoothly return to original position after the attack animation
+	if offset_applied:
+		var tween = create_tween()
+		tween.tween_property(self, "global_position", original_pos, 0.15) \
+			.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+		await tween.finished
+		
 	if not is_dead and sprite:
 		sprite.play("idle")
 
