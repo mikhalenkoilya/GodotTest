@@ -13,6 +13,8 @@ var current_health: int = 0
 var current_armor: int = 0
 var current_magic_resist: int = 0
 var is_dead: bool = false
+# 🔄 Отслеживание оставшихся ответных атак в текущем раунде
+var remaining_counter_attacks: int = 0
 
 const FRIENDLY_COLOR = Color(0.35, 0.75, 1.0)
 const ENEMY_COLOR = Color(1.0, 0.35, 0.35)
@@ -39,6 +41,9 @@ func _ready() -> void:
 	current_health = max_health
 	current_armor = max_armor
 	current_magic_resist = max_magic_resist
+	
+	# 🔄 Инициализация счетчика ответных атак
+	remaining_counter_attacks = class_data.max_counter_attacks if class_data else 0
 	
 	_update_visuals()
 	if sprite and not sprite.is_playing():
@@ -141,6 +146,10 @@ func move_to(target_global_pos: Vector2) -> void:
 	
 	if not is_dead and sprite:
 		sprite.play("idle")
+
+# 🔄 Вызывается в начале раунда для восстановления ресурсов (ответные атаки, и т.д.)
+func reset_turn_state() -> void:
+	remaining_counter_attacks = class_data.max_counter_attacks if class_data else 0
 
 func _update_visuals() -> void:
 	if sprite:
