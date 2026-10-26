@@ -85,6 +85,12 @@ func _start_new_round() -> void:
 	selected_actor = null
 	_clear_highlight()
 	friendly_remaining_moves = friendly_actors.duplicate()
+	
+	# 🔄 Сброс состояния (включая счетчики ответных атак) для всех живых юнитов
+	for actor in friendly_actors + enemy_actors:
+		if is_instance_valid(actor) and not actor.is_dead:
+			actor.reset_turn_state()
+	
 	print("⚔️ Наступил Ваш ход!")
 	turn_changed.emit(true)
 
@@ -160,12 +166,13 @@ func _handle_left_click(target_cell: Vector2i) -> void:
 			await attacker.perform_attack(target)
 			
 			if is_instance_valid(attacker) and is_instance_valid(target) and not target.is_dead:
-				# Добавлен await для корректного ожидания анимации получения урона
 				await target.take_damage(attacker.attack_damage, attacker.attack_type)
 				
-				# 🔄 НОВАЯ ЛОГИКА: Ответная атака
-				if not target.is_dead and target.class_data and target.class_data.can_counter_attack:
-					print("🔄 %s выполняет ответную атаку по %s!" % [target.name, attacker.name])
+				# 🔄 ЛОГИКА: Ответная атака с проверкой и тратой заряда
+				if not target.is_dead and target.class_data and target.remaining_counter_attacks > 0:
+					target.remaining_counter_attacks -= 1 # Тратим один заряд
+					print("🔄 %s выполняет ответную атаку по %s! (Осталось зарядов: %d)" % [target.name, attacker.name, target.remaining_counter_attacks])
+					
 					await target.perform_attack(attacker)
 					if is_instance_valid(attacker) and not attacker.is_dead:
 						await attacker.take_damage(target.attack_damage, target.attack_type)
@@ -246,12 +253,13 @@ func _make_ai_moves_and_attacks() -> void:
 			await get_tree().create_timer(0.2).timeout
 			
 			if is_instance_valid(attacker) and is_instance_valid(target) and not target.is_dead:
-				# Добавлен await для корректного ожидания анимации получения урона
 				await target.take_damage(attacker.attack_damage, attacker.attack_type)
 				
-				# 🔄 НОВАЯ ЛОГИКА: Ответная атака
-				if not target.is_dead and target.class_data and target.class_data.can_counter_attack:
-					print("🔄 %s выполняет ответную атаку по %s!" % [target.name, attacker.name])
+				# 🔄 ЛОГИКА: Ответная атака с проверкой и тратой заряда
+				if not target.is_dead and target.class_data and target.remaining_counter_attacks > 0:
+					target.remaining_counter_attacks -= 1 # Тратим один заряд
+					print("🔄 %s выполняет ответную атаку по %s! (Осталось зарядов: %d)" % [target.name, attacker.name, target.remaining_counter_attacks])
+					
 					await target.perform_attack(attacker)
 					if is_instance_valid(attacker) and not attacker.is_dead:
 						await attacker.take_damage(target.attack_damage, target.attack_type)
