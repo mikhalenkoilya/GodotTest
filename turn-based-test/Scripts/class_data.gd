@@ -10,9 +10,12 @@ enum AttackType { PHYSICAL, MAGIC }
 @export var move_range: int = 3
 @export var attack_range: int = 1
 @export var sprite_texture: Texture2D
-@export var sprite_frames: SpriteFrames 
+@export var sprite_frames: SpriteFrames
 
 # New Combat Stats
 @export var attack_type: AttackType = AttackType.PHYSICAL
-@export var max_armor: int = 30        # Physical shield
-@export var max_magic_resist: int = 30  # Magic shield
+@export var max_armor: int = 30 # Physical shield
+@export var max_magic_resist: int = 30 # Magic shield
+
+# Ответная атака
+@export var can_counter_attack: bool = false
