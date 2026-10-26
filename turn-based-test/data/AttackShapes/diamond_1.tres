@@ -1,7 +1,0 @@
-[gd_resource type="Resource" script_class="AttackPattern" format=3 uid="uid://bgcpsquf48rmd"]
-
-[ext_resource type="Script" uid="uid://bii4bskxhjtt7" path="res://Scripts/attack_pattern.gd" id="1_37hqn"]
-
-[resource]
-script = ExtResource("1_37hqn")
-metadata/_custom_type_script = "uid://bii4bskxhjtt7"

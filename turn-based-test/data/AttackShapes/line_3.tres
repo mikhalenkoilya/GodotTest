@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="AttackPattern" format=3 uid="uid://b20s800lab3ny"]
+
+[ext_resource type="Script" uid="uid://bii4bskxhjtt7" path="res://Scripts/attack_pattern.gd" id="1_uk6dd"]
+
+[resource]
+script = ExtResource("1_uk6dd")
+pattern_name = "Line 3 (Vertical)"
+max_range_heuristic = 3
+relative_cells = Array[Vector2i]([Vector2i(1, 0), Vector2i(2, 0), Vector2i(3, 0)])
+metadata/_custom_type_script = "uid://bii4bskxhjtt7"
