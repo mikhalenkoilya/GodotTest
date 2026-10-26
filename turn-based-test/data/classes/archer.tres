@@ -1,7 +1,8 @@
 [gd_resource type="Resource" script_class="ClassData" format=3 uid="uid://y4u1833v0qip"]
 
 [ext_resource type="Script" uid="uid://b217idjjy25pn" path="res://Scripts/class_data.gd" id="1_1hx7s"]
-[ext_resource type="SpriteFrames" uid="uid://bb10xs0sr2r7h" path="res://ART/Sprites/Animations/huntress.res" id="2_nkgaf"]
+[ext_resource type="Resource" uid="uid://bf46wl3wsobxr" path="res://data/AttackShapes/square_3x3.tres" id="1_uj0l1"]
+[ext_resource type="SpriteFrames" uid="uid://bywsnduprwm76" path="res://data/abilities/warrior.res" id="3_xrves"]
 
 [resource]
 script = ExtResource("1_1hx7s")
@@ -9,4 +10,8 @@ display_name = "Лучник"
 max_hp = 75
 attack_damage = 20
 attack_range = 5
-sprite_frames = ExtResource("2_nkgaf")
+attack_pattern = ExtResource("1_uj0l1")
+sprite_frames = ExtResource("3_xrves")
+attack_type = 0
+max_armor = 10
+max_magic_resist = 0

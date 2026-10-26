@@ -7,6 +7,8 @@ signal died(actor: Actor)
 @export var is_friendly: bool = true
 @export var class_sprite_frames: SpriteFrames
 
+@export var attack_pattern: AttackPattern
+
 @onready var sprite: AnimatedSprite2D = $AnimatedSprite2D
 
 var current_health: int = 0

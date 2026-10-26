@@ -25,7 +25,7 @@ var available_classes: Array[String] = [
 var squad_classes: Array[String] = [
 	"res://data/classes/warrior.tres",
 	"res://data/classes/warrior.tres",
-	"res://data/classes/warrior.tres"
+	"res://data/classes/archer.tres"
 ]
 
 # Get the ClassData resource for a specific squad slot (0, 1, or 2)

@@ -8,14 +8,14 @@ enum AttackType { PHYSICAL, MAGIC }
 @export var attack_damage: int = 15
 @export var move_range: int = 3
 @export var attack_range: int = 1
+
+@export var attack_pattern: AttackPattern 
+
 @export var sprite_texture: Texture2D
 @export var sprite_frames: SpriteFrames
 
-# New Combat Stats
 @export var attack_type: AttackType = AttackType.PHYSICAL
 @export var max_armor: int = 30
 @export var max_magic_resist: int = 30
 
-# 🔄 НОВАЯ ЛОГИКА: Максимальное количество ответных атак за раунд
-# По умолчанию 1. Установите 0, чтобы отключить, или 2+ для нескольких ударов.
 @export var max_counter_attacks: int = 1

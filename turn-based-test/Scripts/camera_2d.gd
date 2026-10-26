@@ -21,7 +21,7 @@ func _update_zoom() -> void:
 	var final_scale = min(scale_x, scale_y)
 	
 	# Optional: Add a little padding (e.g., 0.9 = 90% of screen)
-	final_scale *= 0.95 
+	final_scale *= 0.95
 	
 	# Apply zoom (Godot Camera2D zoom is the inverse of scale)
 	zoom = Vector2(final_scale, final_scale)

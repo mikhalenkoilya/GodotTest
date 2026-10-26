@@ -154,7 +154,12 @@ func _handle_left_click(target_cell: Vector2i) -> void:
 
 	elif current_phase == Phase.ATTACK and selected_actor:
 		var actor_cell = tile_map.local_to_map(tile_map.to_local(selected_actor.global_position))
-		if target_cell == actor_cell or not target_cell in highlighted_cells:
+		
+		#  Проверяем, находится ли целевая клетка в паттерне атаки
+		var attack_cells = get_attack_cells(actor_cell, selected_actor)
+		var is_valid_target = target_cell in attack_cells
+		
+		if target_cell == actor_cell or not is_valid_target:
 			_complete_actor_turn()
 			return
 
@@ -168,17 +173,15 @@ func _handle_left_click(target_cell: Vector2i) -> void:
 			if is_instance_valid(attacker) and is_instance_valid(target) and not target.is_dead:
 				await target.take_damage(attacker.attack_damage, attacker.attack_type)
 				
-				# 🔄 ЛОГИКА: Ответная атака с проверкой и тратой заряда
+				# Ответная атака
 				if not target.is_dead and target.class_data and target.remaining_counter_attacks > 0:
-					target.remaining_counter_attacks -= 1 # Тратим один заряд
+					target.remaining_counter_attacks -= 1
 					print("🔄 %s выполняет ответную атаку по %s! (Осталось зарядов: %d)" % [target.name, attacker.name, target.remaining_counter_attacks])
-					
 					await target.perform_attack(attacker)
 					if is_instance_valid(attacker) and not attacker.is_dead:
 						await attacker.take_damage(target.attack_damage, target.attack_type)
 						
 			_complete_actor_turn()
-
 func _switch_to_attack_phase() -> void:
 	current_phase = Phase.ATTACK
 	_highlight_attack_range(selected_actor)
@@ -220,31 +223,45 @@ func _make_ai_moves_and_attacks() -> void:
 
 		var ai_cell = tile_map.local_to_map(tile_map.to_local(enemy.global_position))
 		var user_cell = tile_map.local_to_map(tile_map.to_local(target_player.global_position))
-		var attack_range = enemy.class_data.attack_range if enemy.class_data else 1
-		var total_distance = abs(user_cell.x - ai_cell.x) + abs(user_cell.y - ai_cell.y)
-
-		if total_distance > attack_range:
+		
+		# 🔄 Проверяем, может ли ИИ уже атаковать с текущей позиции
+		var attack_cells = get_attack_cells(ai_cell, enemy)
+		var can_attack_now = user_cell in attack_cells
+		
+		if not can_attack_now:
 			var move_range = enemy.class_data.move_range if enemy.class_data else 3
 			var ai_reachable = _calculate_reachable_cells(ai_cell, move_range)
+			
 			var best_cell = ai_cell
-			var best_distance = total_distance
+			var best_dist = 99999
+			var can_attack_from_best = false
 
+			# 🔄 Ищем клетку, с которой можно атаковать, используя паттерн
 			for cell in ai_reachable:
+				var cell_attack_cells = get_attack_cells(cell, enemy)
+				var can_attack = user_cell in cell_attack_cells
 				var dist = abs(user_cell.x - cell.x) + abs(user_cell.y - cell.y)
-				if dist < best_distance:
-					best_distance = dist
+				
+				# Приоритет: клетки, с которых возможна атака
+				if can_attack and not can_attack_from_best:
+					can_attack_from_best = true
 					best_cell = cell
+					best_dist = dist
+				# Если статус атаки одинаковый, выбираем клетку ближе к игроку
+				elif can_attack == can_attack_from_best and dist < best_dist:
+					best_cell = cell
+					best_dist = dist
 
 			if best_cell != ai_cell:
-				print("🤖 %s moving to %s" % [enemy.name, best_cell])
+				print("🤖 %s перемещается на %s" % [enemy.name, best_cell])
 				await _try_move_actor_direct(enemy, best_cell)
 				ai_cell = tile_map.local_to_map(tile_map.to_local(enemy.global_position))
 
-		# Attack after moving
+		# Повторно проверяем позицию игрока
 		user_cell = tile_map.local_to_map(tile_map.to_local(target_player.global_position))
-		var final_dist = abs(user_cell.x - ai_cell.x) + abs(user_cell.y - ai_cell.y)
-
-		if final_dist <= attack_range:
+		attack_cells = get_attack_cells(ai_cell, enemy)
+		
+		if user_cell in attack_cells:
 			print("🤖 %s наносит удар по %s" % [enemy.name, target_player.name])
 			var attacker = enemy
 			var target = target_player
@@ -255,11 +272,10 @@ func _make_ai_moves_and_attacks() -> void:
 			if is_instance_valid(attacker) and is_instance_valid(target) and not target.is_dead:
 				await target.take_damage(attacker.attack_damage, attacker.attack_type)
 				
-				# 🔄 ЛОГИКА: Ответная атака с проверкой и тратой заряда
+				# Ответная атака
 				if not target.is_dead and target.class_data and target.remaining_counter_attacks > 0:
-					target.remaining_counter_attacks -= 1 # Тратим один заряд
-					print("🔄 %s выполняет ответную атаку по %s! (Осталось зарядов: %d)" % [target.name, attacker.name, target.remaining_counter_attacks])
-					
+					target.remaining_counter_attacks -= 1
+					print(" %s выполняет ответную атаку по %s! (Осталось зарядов: %d)" % [target.name, attacker.name, target.remaining_counter_attacks])
 					await target.perform_attack(attacker)
 					if is_instance_valid(attacker) and not attacker.is_dead:
 						await attacker.take_damage(target.attack_damage, target.attack_type)
@@ -293,6 +309,21 @@ func _get_tile_cost(cell: Vector2i) -> int:
 	if cost <= 0:
 		return 9999
 	return cost
+
+# 🔄 Получает список абсолютных клеток на основе паттерна и позиции актера
+func get_attack_cells(actor_cell: Vector2i, actor: Actor) -> Array[Vector2i]:
+	var cells: Array[Vector2i] = []
+	
+	if not actor.class_data or not actor.class_data.attack_pattern:
+		# Fallback: если паттерн не задан, используем одну клетку
+		return [actor_cell]
+	
+	var pattern = actor.class_data.attack_pattern
+	for offset in pattern.relative_cells:
+		var absolute_cell = actor_cell + offset
+		cells.append(absolute_cell)
+	
+	return cells
 
 func _calculate_reachable_cells(start_cell: Vector2i, max_cost: int) -> Dictionary:
 	var reachable = {}
@@ -334,14 +365,17 @@ func _highlight_attack_range(actor: Actor) -> void:
 	_clear_highlight()
 	var actor_cell = tile_map.local_to_map(tile_map.to_local(actor.global_position))
 	var source_id = _get_valid_source_id()
-	var attack_range = actor.class_data.attack_range if actor.class_data else 1
-	for x in range(-attack_range, attack_range + 1):
-		for y in range(-attack_range, attack_range + 1):
-			var distance = abs(x) + abs(y)
-			if distance <= attack_range and distance > 0:
-				var check_cell = actor_cell + Vector2i(x, y)
-				grid_layer.set_cell(check_cell, source_id, ATTACK_ATLAS_COORDS)
-				highlighted_cells.append(check_cell)
+	
+	# 🔄 Получаем клетки из паттерна
+	var attack_cells = get_attack_cells(actor_cell, actor)
+	
+	for cell in attack_cells:
+		# Не подсвечиваем клетку самого актера (опционально)
+		if cell == actor_cell:
+			continue
+			
+		grid_layer.set_cell(cell, source_id, ATTACK_ATLAS_COORDS)
+		highlighted_cells.append(cell)
 
 func _clear_highlight() -> void:
 	if not grid_layer: return
