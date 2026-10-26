@@ -69,7 +69,7 @@ func register_actor(actor: Actor) -> void:
 		friendly_actors.append(actor)
 	else:
 		enemy_actors.append(actor)
-	actor.died.connect(_on_actor_died)
+	actor.died.connect(_on_actor_died, CONNECT_ONE_SHOT)
 
 func _on_actor_died(actor: Actor) -> void:
 	friendly_actors.erase(actor)
@@ -231,7 +231,6 @@ func _make_ai_moves_and_attacks() -> void:
 	var active_enemies = enemy_actors.filter(func(e): return is_instance_valid(e) and not e.is_dead)
 	
 	for enemy in active_enemies:
-		if not is_instance_valid(enemy) or enemy.is_dead: continue
 		
 		var target_player = _find_closest_friendly(enemy)
 		if not target_player: continue
