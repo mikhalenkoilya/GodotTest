@@ -1,7 +1,6 @@
 class_name ClassData
 extends Resource
 
-# Define attack types
 enum AttackType { PHYSICAL, MAGIC }
 
 @export var display_name: String = "Воин"
@@ -14,8 +13,9 @@ enum AttackType { PHYSICAL, MAGIC }
 
 # New Combat Stats
 @export var attack_type: AttackType = AttackType.PHYSICAL
-@export var max_armor: int = 30 # Physical shield
-@export var max_magic_resist: int = 30 # Magic shield
+@export var max_armor: int = 30
+@export var max_magic_resist: int = 30
 
-# Ответная атака
-@export var can_counter_attack: bool = false
+# 🔄 НОВАЯ ЛОГИКА: Максимальное количество ответных атак за раунд
+# По умолчанию 1. Установите 0, чтобы отключить, или 2+ для нескольких ударов.
+@export var max_counter_attacks: int = 1
