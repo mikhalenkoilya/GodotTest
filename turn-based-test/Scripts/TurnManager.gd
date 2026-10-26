@@ -101,13 +101,13 @@ func _input(event: InputEvent) -> void:
 	if event is InputEventMouseMotion:
 		_update_hover_stats()
 		
-		# ✅ NEW: Update cursor while moving the mouse
+		# Update cursor while moving the mouse
 		if current_turn == Turn.USER and tile_map:
 			var target_cell = tile_map.local_to_map(tile_map.get_local_mouse_position())
 			_update_attack_cursor(target_cell)
 		return
 		
-	# ✅ FIX: Spacebar ONLY ends the currently selected character's turn
+	#  Spacebar ends the currently selected character's turn
 	if event is InputEventKey and event.pressed and not event.is_echo():
 		if event.keycode == KEY_SPACE:
 			if current_turn == Turn.USER and not is_processing_move and selected_actor != null:
@@ -168,22 +168,16 @@ func _handle_left_click(target_cell: Vector2i) -> void:
 				_switch_to_attack_phase()
 				
 	elif current_phase == Phase.ATTACK and selected_actor:
-		var actor_cell = tile_map.local_to_map(tile_map.to_local(selected_actor.global_position))
-		
-		if target_cell == actor_cell or not target_cell in highlighted_cells:
-			_complete_actor_turn()
-			return
-			
 		var target_enemy = _get_actor_at_cell(target_cell, enemy_actors)
-		if target_enemy:
+		
+		# ONLY proceed if we actually clicked on a valid enemy within attack range
+		if target_enemy and target_cell in highlighted_cells:
 			var attacker = selected_actor
-			var target = target_enemy # ✅ Store target reference
 			
-			# ✅ Pass the target to perform_attack for the offset lunge
-			await attacker.perform_attack(target)
+			await attacker.perform_attack()
 			
-			if is_instance_valid(attacker) and is_instance_valid(target):
-				target.take_damage(attacker.attack_damage, attacker.attack_type)
+			if is_instance_valid(attacker) and is_instance_valid(target_enemy):
+				target_enemy.take_damage(attacker.attack_damage, attacker.attack_type)
 				
 			_complete_actor_turn()
 
@@ -385,7 +379,7 @@ func _try_move_actor(actor: Actor, target_cell: Vector2i) -> bool:
 	await actor.move_to(target_global_pos)
 	return true
 
-# NEW: Direct move for AI (bypasses reachable_cells check since AI calculates its own)
+# Direct move for AI (bypasses reachable_cells check since AI calculates its own)
 func _try_move_actor_direct(actor: Actor, target_cell: Vector2i) -> bool:
 	if _is_cell_occupied(target_cell): return false
 	
@@ -447,7 +441,7 @@ func _update_hover_stats() -> void:
 			combat_ui.update_target_stats(hovered_actor)
 		else:
 			combat_ui.clear_target_stats()
-# ✅ NEW: Dynamically change the mouse cursor based on attack type & target validity
+# Dynamically change the mouse cursor based on attack type & target validity
 func _update_attack_cursor(target_cell: Vector2i) -> void:
 	if current_phase != Phase.ATTACK or not selected_actor:
 		# Reset to default cursor when not attacking
@@ -459,7 +453,7 @@ func _update_attack_cursor(target_cell: Vector2i) -> void:
 	var is_valid_target = target_enemy != null and target_cell in highlighted_cells
 	
 	if is_valid_target:
-		# ✅ Show attack-type-specific cursor
+		# Show attack-type-specific cursor
 		if selected_actor.attack_type == ClassData.AttackType.PHYSICAL:
 			Input.set_custom_mouse_cursor(CURSOR_SWORD, Input.CURSOR_ARROW, CURSOR_HOTSPOT)
 		else:
