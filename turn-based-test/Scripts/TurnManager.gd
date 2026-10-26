@@ -30,10 +30,9 @@ const ATTACK_ATLAS_COORDS = Vector2i(1, 0)
 var ui_layer: CanvasLayer = null
 var end_turn_button: Button = null
 
-# ✅ Custom attack cursors based on damage type
-const CURSOR_SWORD = preload("res://ART/cursors/sword.png") # Physical damage
-const CURSOR_MAGIC = preload("res://ART/cursors/wand.png") # Magic damage
-const CURSOR_DEFAULT = preload("res://ART/cursors/arrow.png") # Normal arrow (optional fallback)
+const CURSOR_SWORD = preload("res://ART/cursors/sword.png")
+const CURSOR_MAGIC = preload("res://ART/cursors/wand.png")
+const CURSOR_DEFAULT = preload("res://ART/cursors/arrow.png")
 const CURSOR_HOTSPOT = Vector2(16, 16)
 
 @onready var combat_ui: Node = get_node_or_null("../CombatUI")
@@ -86,11 +85,11 @@ func _start_new_round() -> void:
 	_clear_highlight()
 	friendly_remaining_moves = friendly_actors.duplicate()
 	
-	# 🔄 Сброс состояния (включая счетчики ответных атак) для всех живых юнитов
+	# 🔄 Сброс счетчиков ответных атак в начале раунда
 	for actor in friendly_actors + enemy_actors:
 		if is_instance_valid(actor) and not actor.is_dead:
-			actor.reset_turn_state()
-	
+			actor.remaining_counter_attacks = actor.class_data.max_counter_attacks if actor.class_data else 0
+
 	print("⚔️ Наступил Ваш ход!")
 	turn_changed.emit(true)
 
@@ -155,9 +154,8 @@ func _handle_left_click(target_cell: Vector2i) -> void:
 	elif current_phase == Phase.ATTACK and selected_actor:
 		var actor_cell = tile_map.local_to_map(tile_map.to_local(selected_actor.global_position))
 		
-		#  Проверяем, находится ли целевая клетка в паттерне атаки
-		var attack_cells = get_attack_cells(actor_cell, selected_actor)
-		var is_valid_target = target_cell in attack_cells
+		# Проверка: является ли клетка допустимой целью атаки
+		var is_valid_target = target_cell in highlighted_cells
 		
 		if target_cell == actor_cell or not is_valid_target:
 			_complete_actor_turn()
@@ -173,15 +171,16 @@ func _handle_left_click(target_cell: Vector2i) -> void:
 			if is_instance_valid(attacker) and is_instance_valid(target) and not target.is_dead:
 				await target.take_damage(attacker.attack_damage, attacker.attack_type)
 				
-				# Ответная атака
+				# 🔄 Ответная атака
 				if not target.is_dead and target.class_data and target.remaining_counter_attacks > 0:
 					target.remaining_counter_attacks -= 1
-					print("🔄 %s выполняет ответную атаку по %s! (Осталось зарядов: %d)" % [target.name, attacker.name, target.remaining_counter_attacks])
+					print("🔄 %s выполняет ответную атаку по %s! (Осталось: %d)" % [target.name, attacker.name, target.remaining_counter_attacks])
 					await target.perform_attack(attacker)
 					if is_instance_valid(attacker) and not attacker.is_dead:
 						await attacker.take_damage(target.attack_damage, target.attack_type)
 						
 			_complete_actor_turn()
+
 func _switch_to_attack_phase() -> void:
 	current_phase = Phase.ATTACK
 	_highlight_attack_range(selected_actor)
@@ -213,6 +212,17 @@ func _end_user_turn() -> void:
 	await _make_ai_moves_and_attacks()
 	_start_new_round()
 
+# 🔄 Вспомогательная функция: проверка, попадает ли клетка в паттерн атаки
+func _is_cell_in_attack_pattern(actor_cell: Vector2i, target_cell: Vector2i, actor: Actor) -> bool:
+	if not actor.class_data or not actor.class_data.attack_pattern:
+		var attack_range = actor.class_data.attack_range if actor.class_data else 1
+		return (abs(target_cell.x - actor_cell.x) + abs(target_cell.y - actor_cell.y)) <= attack_range
+	
+	for offset in actor.class_data.attack_pattern.relative_cells:
+		if actor_cell + offset == target_cell:
+			return true
+	return false
+
 func _make_ai_moves_and_attacks() -> void:
 	var active_enemies = enemy_actors.filter(func(e): return is_instance_valid(e) and not e.is_dead)
 	for enemy in active_enemies:
@@ -224,44 +234,35 @@ func _make_ai_moves_and_attacks() -> void:
 		var ai_cell = tile_map.local_to_map(tile_map.to_local(enemy.global_position))
 		var user_cell = tile_map.local_to_map(tile_map.to_local(target_player.global_position))
 		
-		# 🔄 Проверяем, может ли ИИ уже атаковать с текущей позиции
-		var attack_cells = get_attack_cells(ai_cell, enemy)
-		var can_attack_now = user_cell in attack_cells
+		var can_attack_now = _is_cell_in_attack_pattern(ai_cell, user_cell, enemy)
 		
 		if not can_attack_now:
 			var move_range = enemy.class_data.move_range if enemy.class_data else 3
 			var ai_reachable = _calculate_reachable_cells(ai_cell, move_range)
 			
 			var best_cell = ai_cell
-			var best_dist = 99999
+			var best_distance = 99999
 			var can_attack_from_best = false
 
-			# 🔄 Ищем клетку, с которой можно атаковать, используя паттерн
 			for cell in ai_reachable:
-				var cell_attack_cells = get_attack_cells(cell, enemy)
-				var can_attack = user_cell in cell_attack_cells
+				var can_attack = _is_cell_in_attack_pattern(cell, user_cell, enemy)
 				var dist = abs(user_cell.x - cell.x) + abs(user_cell.y - cell.y)
 				
-				# Приоритет: клетки, с которых возможна атака
 				if can_attack and not can_attack_from_best:
 					can_attack_from_best = true
 					best_cell = cell
-					best_dist = dist
-				# Если статус атаки одинаковый, выбираем клетку ближе к игроку
-				elif can_attack == can_attack_from_best and dist < best_dist:
+					best_distance = dist
+				elif can_attack == can_attack_from_best and dist < best_distance:
 					best_cell = cell
-					best_dist = dist
+					best_distance = dist
 
 			if best_cell != ai_cell:
-				print("🤖 %s перемещается на %s" % [enemy.name, best_cell])
+				print("🤖 %s moving to %s" % [enemy.name, best_cell])
 				await _try_move_actor_direct(enemy, best_cell)
 				ai_cell = tile_map.local_to_map(tile_map.to_local(enemy.global_position))
 
-		# Повторно проверяем позицию игрока
 		user_cell = tile_map.local_to_map(tile_map.to_local(target_player.global_position))
-		attack_cells = get_attack_cells(ai_cell, enemy)
-		
-		if user_cell in attack_cells:
+		if _is_cell_in_attack_pattern(ai_cell, user_cell, enemy):
 			print("🤖 %s наносит удар по %s" % [enemy.name, target_player.name])
 			var attacker = enemy
 			var target = target_player
@@ -272,10 +273,9 @@ func _make_ai_moves_and_attacks() -> void:
 			if is_instance_valid(attacker) and is_instance_valid(target) and not target.is_dead:
 				await target.take_damage(attacker.attack_damage, attacker.attack_type)
 				
-				# Ответная атака
 				if not target.is_dead and target.class_data and target.remaining_counter_attacks > 0:
 					target.remaining_counter_attacks -= 1
-					print(" %s выполняет ответную атаку по %s! (Осталось зарядов: %d)" % [target.name, attacker.name, target.remaining_counter_attacks])
+					print("🔄 %s выполняет ответную атаку по %s! (Осталось: %d)" % [target.name, attacker.name, target.remaining_counter_attacks])
 					await target.perform_attack(attacker)
 					if is_instance_valid(attacker) and not attacker.is_dead:
 						await attacker.take_damage(target.attack_damage, target.attack_type)
@@ -309,21 +309,6 @@ func _get_tile_cost(cell: Vector2i) -> int:
 	if cost <= 0:
 		return 9999
 	return cost
-
-# 🔄 Получает список абсолютных клеток на основе паттерна и позиции актера
-func get_attack_cells(actor_cell: Vector2i, actor: Actor) -> Array[Vector2i]:
-	var cells: Array[Vector2i] = []
-	
-	if not actor.class_data or not actor.class_data.attack_pattern:
-		# Fallback: если паттерн не задан, используем одну клетку
-		return [actor_cell]
-	
-	var pattern = actor.class_data.attack_pattern
-	for offset in pattern.relative_cells:
-		var absolute_cell = actor_cell + offset
-		cells.append(absolute_cell)
-	
-	return cells
 
 func _calculate_reachable_cells(start_cell: Vector2i, max_cost: int) -> Dictionary:
 	var reachable = {}
@@ -366,16 +351,24 @@ func _highlight_attack_range(actor: Actor) -> void:
 	var actor_cell = tile_map.local_to_map(tile_map.to_local(actor.global_position))
 	var source_id = _get_valid_source_id()
 	
-	# 🔄 Получаем клетки из паттерна
-	var attack_cells = get_attack_cells(actor_cell, actor)
+	var attack_cells: Array[Vector2i] = []
+	
+	# 🔄 Надежная проверка: если паттерн назначен, используем его
+	if actor.class_data and actor.class_data.attack_pattern:
+		for offset in actor.class_data.attack_pattern.relative_cells:
+			attack_cells.append(actor_cell + offset)
+	else:
+		# 🔄 Fallback: если паттерн забыли назначить, используем старый ромб
+		var attack_range = actor.class_data.attack_range if actor.class_data else 1
+		for x in range(-attack_range, attack_range + 1):
+			for y in range(-attack_range, attack_range + 1):
+				if abs(x) + abs(y) <= attack_range and (x != 0 or y != 0):
+					attack_cells.append(actor_cell + Vector2i(x, y))
 	
 	for cell in attack_cells:
-		# Не подсвечиваем клетку самого актера (опционально)
-		if cell == actor_cell:
-			continue
-			
-		grid_layer.set_cell(cell, source_id, ATTACK_ATLAS_COORDS)
-		highlighted_cells.append(cell)
+		if cell != actor_cell: # Не подсвечиваем клетку самого актера
+			grid_layer.set_cell(cell, source_id, ATTACK_ATLAS_COORDS)
+			highlighted_cells.append(cell)
 
 func _clear_highlight() -> void:
 	if not grid_layer: return
@@ -462,4 +455,4 @@ func _update_attack_cursor(target_cell: Vector2i) -> void:
 		else:
 			Input.set_custom_mouse_cursor(CURSOR_MAGIC, Input.CURSOR_ARROW, CURSOR_HOTSPOT)
 	else:
-		Input.set_custom_mouse_cursor(CURSOR_DEFAULT, Input.CURSOR_ARROW, CURSOR_HOTSPOT)
+		Input.set_custom_mouse_cursor(CURSOR_DEFAULT, Input.CURSOR_ARROW, CURSOR_HOTSPOT)	

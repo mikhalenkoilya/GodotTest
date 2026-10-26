@@ -5,7 +5,3 @@
 [resource]
 script = ExtResource("1_yf1x3")
 metadata/_custom_type_script = "uid://bii4bskxhjtt7"
-
-pattern_name: "Single Target"
-max_range_heuristic: 1
-relative_cells: [Vector2i(0, 0)]

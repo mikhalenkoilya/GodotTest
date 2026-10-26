@@ -12,6 +12,5 @@ attack_damage = 20
 attack_range = 5
 attack_pattern = ExtResource("1_uj0l1")
 sprite_frames = ExtResource("3_xrves")
-attack_type = 0
 max_armor = 10
 max_magic_resist = 0
