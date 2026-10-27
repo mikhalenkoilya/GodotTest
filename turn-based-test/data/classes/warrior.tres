@@ -1,7 +1,7 @@
 [gd_resource type="Resource" script_class="ClassData" format=3 uid="uid://y4u1833v0qip"]
 
 [ext_resource type="Script" uid="uid://b217idjjy25pn" path="res://Scripts/class_data.gd" id="1_74vqn"]
-[ext_resource type="Resource" uid="uid://ei6ddmwsgq4a" path="res://data/AttackShapes/Square_3x3.tres" id="1_rqqb5"]
+[ext_resource type="Resource" uid="uid://bsw3mfqktfa30" path="res://data/AttackShapes/cross_1.tres" id="1_rqqb5"]
 [ext_resource type="SpriteFrames" uid="uid://dw1e26qqj12d6" path="res://ART/Sprites/Animations/warrior_sptires.res" id="2_agnmr"]
 
 [resource]
