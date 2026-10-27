@@ -36,6 +36,9 @@ var attack_damage: int:
 var attack_type: ClassData.AttackType:
 	get: return class_data.attack_type if class_data else ClassData.AttackType.PHYSICAL
 
+# Add these variables at the top of actor.gd (after your existing vars)
+var current_cooldowns: Dictionary = {} # skill_name -> turns remaining
+
 func _ready() -> void:
 	if not class_data:
 		push_warning("⚠️ Actor '%s' is missing Class Data assignment in the Inspector! Defaulting to base stats." % name)
@@ -157,3 +160,20 @@ func _update_visuals() -> void:
 	if sprite:
 		sprite.modulate = FRIENDLY_COLOR if is_friendly else ENEMY_COLOR
 		sprite.flip_h = not is_friendly
+# Add these methods to actor.gd
+func reduce_cooldowns() -> void:
+	for skill_name in current_cooldowns.keys():
+		current_cooldowns[skill_name] -= 1
+		if current_cooldowns[skill_name] <= 0:
+			current_cooldowns.erase(skill_name)
+
+func is_skill_on_cooldown(skill: SkillData) -> bool:
+	return current_cooldowns.has(skill.display_name) and current_cooldowns[skill.display_name] > 0
+
+func put_skill_on_cooldown(skill: SkillData) -> void:
+	current_cooldowns[skill.display_name] = skill.cooldown
+
+func get_cooldown_remaining(skill: SkillData) -> int:
+	if current_cooldowns.has(skill.display_name):
+		return current_cooldowns[skill.display_name]
+	return 0

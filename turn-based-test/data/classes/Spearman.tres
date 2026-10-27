@@ -1,4 +1,4 @@
-[gd_resource type="Resource" script_class="ClassData" format=3 uid="uid://csd2offmp73qr"]
+[gd_resource type="Resource" script_class="ClassData" format=3 uid="uid://bv6um5g2xxrxw"]
 
 [ext_resource type="Script" uid="uid://b217idjjy25pn" path="res://Scripts/class_data.gd" id="1_l7aat"]
 [ext_resource type="Resource" uid="uid://bsw3mfqktfa30" path="res://data/AttackShapes/cross_1.tres" id="1_w1c1b"]

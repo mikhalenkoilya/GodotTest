@@ -3,12 +3,16 @@
 [ext_resource type="Script" uid="uid://b217idjjy25pn" path="res://Scripts/class_data.gd" id="1_74vqn"]
 [ext_resource type="Resource" uid="uid://ei6ddmwsgq4a" path="res://data/AttackShapes/Square_3x3.tres" id="1_rqqb5"]
 [ext_resource type="SpriteFrames" uid="uid://dw1e26qqj12d6" path="res://ART/Sprites/Animations/warrior_sptires.res" id="2_agnmr"]
+[ext_resource type="Script" uid="uid://cqmosy6l3e36c" path="res://Scripts/skill_data.gd" id="3_8y3rw"]
+[ext_resource type="Resource" uid="uid://jsyxo3y6r5qu" path="res://data/skills/Swing.tres" id="4_i8kcp"]
 
 [resource]
 script = ExtResource("1_74vqn")
 max_hp = 70
+attack_damage = 100
 move_range = 2
 attack_pattern = ExtResource("1_rqqb5")
 sprite_frames = ExtResource("2_agnmr")
 max_armor = 10
 max_magic_resist = 15
+skills = Array[ExtResource("3_8y3rw")]([ExtResource("4_i8kcp")])

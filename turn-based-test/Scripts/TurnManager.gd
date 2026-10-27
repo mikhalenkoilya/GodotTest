@@ -155,9 +155,10 @@ func _handle_left_click(target_cell: Vector2i) -> void:
 					_switch_to_attack_phase()
 				else:
 					_highlight_available_moves(selected_actor)
-			else:
-				_switch_to_attack_phase()
-
+			# ✅ REMOVED: else: _switch_to_attack_phase()
+			# Clicking an empty/unreachable cell now does nothing. 
+			# Use the "End Turn" button or Right-Click to cancel/skip.
+			
 	elif current_phase == Phase.ATTACK and selected_actor:
 		var actor_cell = tile_map.local_to_map(tile_map.to_local(selected_actor.global_position))
 		
@@ -165,14 +166,15 @@ func _handle_left_click(target_cell: Vector2i) -> void:
 		var is_valid_target = target_cell in highlighted_cells
 		
 		if target_cell == actor_cell or not is_valid_target:
-			_complete_actor_turn()
+			# ✅ REMOVED: _complete_actor_turn()
+			# Clicking an empty/invalid cell now does nothing. 
+			# Player must explicitly use the "Конец хода" button to skip the attack phase.
 			return
 
 		var target_enemy = _get_actor_at_cell(target_cell, enemy_actors)
 		if target_enemy:
 			var attacker = selected_actor
 			var target = target_enemy
-			
 			await attacker.perform_attack(target)
 			
 			if is_instance_valid(attacker) and is_instance_valid(target) and not target.is_dead:
@@ -188,7 +190,7 @@ func _handle_left_click(target_cell: Vector2i) -> void:
 					await target.perform_attack(attacker)
 					if is_instance_valid(attacker) and not attacker.is_dead:
 						await attacker.take_damage(target.attack_damage, target.attack_type)
-						
+			
 			_complete_actor_turn()
 
 func _switch_to_attack_phase() -> void:

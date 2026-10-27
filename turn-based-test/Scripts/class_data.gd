@@ -22,3 +22,5 @@ enum AttackType { PHYSICAL, MAGIC }
 
 # 🔄 Ответные атаки за раунд
 @export var max_counter_attacks: int = 1
+
+@export var skills: Array[SkillData] = []

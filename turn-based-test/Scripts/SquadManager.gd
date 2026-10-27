@@ -20,11 +20,15 @@ var available_classes: Array[String] = [
 	"res://data/classes/warrior.tres",
 	"res://data/classes/archer.tres",
 	"res://data/classes/mage.tres",
-	"res://data/classes/Spearman.tres"
+	"res://data/classes/spearman.tres"
 ]
 
 # 🔄 UPDATED: Start empty, will be populated dynamically
-var squad_classes: Array[String] = []
+var squad_classes: Array[String] = [
+	"res://data/classes/warrior.tres",
+	"res://data/classes/spearman.tres",
+	"res://data/classes/archer.tres"
+]
 
 # 🔄 NEW: Generate a random squad of enemies
 func generate_random_enemy_squad(count: int = 3) -> Array[String]:
