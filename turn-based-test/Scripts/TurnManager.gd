@@ -103,9 +103,16 @@ func _input(event: InputEvent) -> void:
 
 	if event is InputEventKey and event.pressed and not event.is_echo():
 		if event.keycode == KEY_SPACE:
+			# ✅ UPDATED: Skip only 1 phase at a time
 			if current_turn == Turn.USER and not is_processing_move and selected_actor != null:
-				_complete_actor_turn()
+				if current_phase == Phase.MOVE:
+					# Skip movement phase, transition to attack phase
+					_switch_to_attack_phase()
+				elif current_phase == Phase.ATTACK:
+					# Skip attack phase, complete this character's turn
+					_complete_actor_turn()
 			return
+			
 		if event.is_action_pressed("end_turn"):
 			_on_end_turn_button_pressed()
 			return
@@ -171,8 +178,11 @@ func _handle_left_click(target_cell: Vector2i) -> void:
 			if is_instance_valid(attacker) and is_instance_valid(target) and not target.is_dead:
 				await target.take_damage(attacker.attack_damage, attacker.attack_type)
 				
-				# 🔄 Ответная атака
-				if not target.is_dead and target.class_data and target.remaining_counter_attacks > 0:
+				# 🔄 Ответная атака (ТОЛЬКО если атакующий находится в зоне действия паттерна атаки цели)
+				var defender_cell = tile_map.local_to_map(tile_map.to_local(target.global_position))
+				var attacker_cell = tile_map.local_to_map(tile_map.to_local(attacker.global_position))
+				
+				if not target.is_dead and target.class_data and target.remaining_counter_attacks > 0 and _is_cell_in_attack_pattern(defender_cell, attacker_cell, target):
 					target.remaining_counter_attacks -= 1
 					print("🔄 %s выполняет ответную атаку по %s! (Осталось: %d)" % [target.name, attacker.name, target.remaining_counter_attacks])
 					await target.perform_attack(attacker)
@@ -215,8 +225,8 @@ func _end_user_turn() -> void:
 # 🔄 Вспомогательная функция: проверка, попадает ли клетка в паттерн атаки
 func _is_cell_in_attack_pattern(actor_cell: Vector2i, target_cell: Vector2i, actor: Actor) -> bool:
 	if not actor.class_data or not actor.class_data.attack_pattern:
-		var attack_range = actor.class_data.attack_range if actor.class_data else 1
-		return (abs(target_cell.x - actor_cell.x) + abs(target_cell.y - actor_cell.y)) <= attack_range
+		# Fallback: если паттерн не назначен, считаем дальность атаки равной 1 клетке
+		return (abs(target_cell.x - actor_cell.x) + abs(target_cell.y - actor_cell.y)) <= 1
 	
 	for offset in actor.class_data.attack_pattern.relative_cells:
 		if actor_cell + offset == target_cell:
@@ -273,7 +283,11 @@ func _make_ai_moves_and_attacks() -> void:
 			if is_instance_valid(attacker) and is_instance_valid(target) and not target.is_dead:
 				await target.take_damage(attacker.attack_damage, attacker.attack_type)
 				
-				if not target.is_dead and target.class_data and target.remaining_counter_attacks > 0:
+				# 🔄 Ответная атака (ТОЛЬКО если атакующий находится в зоне действия паттерна атаки цели)
+				var defender_cell = tile_map.local_to_map(tile_map.to_local(target.global_position))
+				var attacker_cell = tile_map.local_to_map(tile_map.to_local(attacker.global_position))
+				
+				if not target.is_dead and target.class_data and target.remaining_counter_attacks > 0 and _is_cell_in_attack_pattern(defender_cell, attacker_cell, target):
 					target.remaining_counter_attacks -= 1
 					print("🔄 %s выполняет ответную атаку по %s! (Осталось: %d)" % [target.name, attacker.name, target.remaining_counter_attacks])
 					await target.perform_attack(attacker)
@@ -358,11 +372,11 @@ func _highlight_attack_range(actor: Actor) -> void:
 		for offset in actor.class_data.attack_pattern.relative_cells:
 			attack_cells.append(actor_cell + offset)
 	else:
-		# 🔄 Fallback: если паттерн забыли назначить, используем старый ромб
-		var attack_range = actor.class_data.attack_range if actor.class_data else 1
-		for x in range(-attack_range, attack_range + 1):
-			for y in range(-attack_range, attack_range + 1):
-				if abs(x) + abs(y) <= attack_range and (x != 0 or y != 0):
+		# 🔄 Fallback: если паттерн забыли назначить, используем старый ромб радиусом 1
+		var fallback_range = 1
+		for x in range(-fallback_range, fallback_range + 1):
+			for y in range(-fallback_range, fallback_range + 1):
+				if abs(x) + abs(y) <= fallback_range and (x != 0 or y != 0):
 					attack_cells.append(actor_cell + Vector2i(x, y))
 	
 	for cell in attack_cells:

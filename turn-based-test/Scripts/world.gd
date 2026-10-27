@@ -6,16 +6,12 @@ const ACTOR_SCENE = preload("res://scenes/actor_player.tscn")
 @onready var turn_manager: Node = $Tiles/TurnManager
 
 # Define enemy squad composition using the same .tres class system
-var enemy_squad_classes: Array[String] = [
-	"res://data/classes/warrior.tres",
-	"res://data/classes/warrior.tres",
-	"res://data/classes/warrior.tres"
-]
+var enemy_squad_classes: Array[String] = []
 
 func _ready() -> void:
 	_spawn_squad()
-	_spawn_enemies() # <-- Added enemy spawn logic
-	
+	enemy_squad_classes = SquadManager.generate_random_enemy_squad(3)
+	print("🎲 Random Enemy Squad Generated: ", enemy_squad_classes)
 	if turn_manager:
 		await get_tree().process_frame 
 		turn_manager.initialize_game()
@@ -46,7 +42,7 @@ func _spawn_enemies() -> void:
 		var new_actor = _create_actor(class_data, false, i)
 		add_child(new_actor)
 		turn_manager.register_actor(new_actor)
-		print("✅ Spawned Enemy: ", new_actor.name, " with move_range: ", class_data.move_range)
+		print("✅ Spawned Enemy: ", new_actor.name)
 
 # Helper function to keep spawn logic DRY (Don't Repeat Yourself)
 func _create_actor(class_data: ClassData, friendly: bool, index: int) -> Actor:
