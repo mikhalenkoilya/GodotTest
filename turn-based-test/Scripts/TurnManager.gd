@@ -165,33 +165,48 @@ func _handle_left_click(target_cell: Vector2i) -> void:
 		# Проверка: является ли клетка допустимой целью атаки
 		var is_valid_target = target_cell in highlighted_cells
 		
-		if target_cell == actor_cell or not is_valid_target:
-			# ✅ REMOVED: _complete_actor_turn()
-			# Clicking an empty/invalid cell now does nothing. 
-			# Player must explicitly use the "Конец хода" button to skip the attack phase.
+		if not is_valid_target:
+			_complete_actor_turn()
 			return
 
-		var target_enemy = _get_actor_at_cell(target_cell, enemy_actors)
-		if target_enemy:
-			var attacker = selected_actor
-			var target = target_enemy
-			await attacker.perform_attack(target)
-			
-			if is_instance_valid(attacker) and is_instance_valid(target) and not target.is_dead:
-				await target.take_damage(attacker.attack_damage, attacker.attack_type)
-				
-				# 🔄 Ответная атака (ТОЛЬКО если атакующий находится в зоне действия паттерна атаки цели)
-				var defender_cell = tile_map.local_to_map(tile_map.to_local(target.global_position))
-				var attacker_cell = tile_map.local_to_map(tile_map.to_local(attacker.global_position))
-				
-				if not target.is_dead and target.class_data and target.remaining_counter_attacks > 0 and _is_cell_in_attack_pattern(defender_cell, attacker_cell, target):
-					target.remaining_counter_attacks -= 1
-					print("🔄 %s выполняет ответную атаку по %s! (Осталось: %d)" % [target.name, attacker.name, target.remaining_counter_attacks])
-					await target.perform_attack(attacker)
-					if is_instance_valid(attacker) and not attacker.is_dead:
-						await attacker.take_damage(target.attack_damage, target.attack_type)
-			
-			_complete_actor_turn()
+		var attacker = selected_actor
+		var pattern = attacker.class_data.attack_pattern if attacker.class_data else null
+		
+		if pattern and not pattern.relative_cells.is_empty():
+			# Атакуем ВСЕХ врагов в пределах паттерна относительно клетки атакующего
+			for offset in pattern.relative_cells:
+				var check_cell = actor_cell + offset
+				var target_enemy = _get_actor_at_cell(check_cell, enemy_actors)
+				if target_enemy:
+					print("⚔️ %s атакует %s в клетке %s" % [attacker.name, target_enemy.name, check_cell])
+					await attacker.perform_attack(target_enemy)
+					await get_tree().create_timer(0.2).timeout
+					
+					if is_instance_valid(attacker) and is_instance_valid(target_enemy) and not target_enemy.is_dead:
+						await target_enemy.take_damage(attacker.attack_damage, attacker.attack_type)
+						
+						# 🔄 Ответная атака
+						if not target_enemy.is_dead and target_enemy.class_data and target_enemy.remaining_counter_attacks > 0:
+							target_enemy.remaining_counter_attacks -= 1
+							print("🔄 %s выполняет ответную атаку по %s! (Осталось: %d)" % [target_enemy.name, attacker.name, target_enemy.remaining_counter_attacks])
+							await target_enemy.perform_attack(attacker)
+							if is_instance_valid(attacker) and not attacker.is_dead:
+								await attacker.take_damage(target_enemy.attack_damage, target_enemy.attack_type)
+		else:
+			# Fallback: одиночная атака по кликнутой цели (если паттерн не задан)
+			var target_enemy = _get_actor_at_cell(target_cell, enemy_actors)
+			if target_enemy:
+				await attacker.perform_attack(target_enemy)
+				if is_instance_valid(attacker) and is_instance_valid(target_enemy) and not target_enemy.is_dead:
+					await target_enemy.take_damage(attacker.attack_damage, attacker.attack_type)
+					
+					if not target_enemy.is_dead and target_enemy.class_data and target_enemy.remaining_counter_attacks > 0:
+						target_enemy.remaining_counter_attacks -= 1
+						await target_enemy.perform_attack(attacker)
+						if is_instance_valid(attacker) and not attacker.is_dead:
+							await attacker.take_damage(target_enemy.attack_damage, target_enemy.attack_type)
+							
+		_complete_actor_turn()
 
 func _switch_to_attack_phase() -> void:
 	current_phase = Phase.ATTACK

@@ -1,7 +1,7 @@
 [gd_resource type="Resource" script_class="SkillData" format=3 uid="uid://jsyxo3y6r5qu"]
 
 [ext_resource type="Script" uid="uid://cqmosy6l3e36c" path="res://Scripts/skill_data.gd" id="1_8fa6j"]
-[ext_resource type="Resource" uid="uid://b0b1o7bwiww0n" path="res://data/AttackShapes/diamond_3.tres" id="1_ikrvj"]
+[ext_resource type="Resource" uid="uid://ei6ddmwsgq4a" path="res://data/AttackShapes/Square_3x3.tres" id="1_ikrvj"]
 
 [resource]
 script = ExtResource("1_8fa6j")
