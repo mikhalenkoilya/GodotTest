@@ -168,13 +168,30 @@ func _execute_basic_attack(attacker: Actor, defender: Actor) -> void:
 				await attacker.take_damage(defender.class_data.attack_damage, defender.class_data.attack_type)
 
 func _resolve_skill(actor: Actor, skill: SkillData, target: Actor, target_cell: Vector2i) -> void:
-	# Placeholder for skill-specific logic (e.g., Laquearius Pull, Murmillo Knockback)
-	# This is where you'd call actor.execute_skill(skill, target) and handle the unique Dev Notes.
 	print("🛠️ Resolving skill: %s on %s" % [skill.display_name, target.name if target else "Area"])
 	
-	# Example: Apply damage
-	if target and not target.is_dead:
-		await target.take_damage(int(actor.class_data.attack_damage * skill.damage_multiplier), skill.attack_type)
+	if not target or target.is_dead:
+		return
+
+	# GDD: Multi-hit Resolution Loop
+	# Each hit rolls separately for future dodge/crit systems, and strips armor incrementally.
+	for i in range(skill.hit_count):
+		if target.is_dead:
+			break # Stop hitting if the target dies mid-flurry
+			
+		print("  ➔ Hit %d of %d" % [i + 1, skill.hit_count])
+		
+		# Calculate damage for this specific hit
+		var hit_damage = int(actor.class_data.attack_damage * skill.damage_multiplier)
+		
+		# Execute damage (actor.gd will handle bypass and armor stripping per hit)
+		await target.take_damage(hit_damage, skill.attack_type, skill.armor_bypass_percent, skill.applies_status)
+		
+		# Small visual pause between hits
+		await get_tree().create_timer(0.2).timeout
+
+	# Note: Status effects are applied on the first hit that lands, 
+	# but you can adjust this if a specific skill should only apply on the final hit.
 
 # ─── HELPERS & HIGHLIGHTING ───
 func _get_actor_at_cell(cell: Vector2i) -> Actor:
