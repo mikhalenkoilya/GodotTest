@@ -8,7 +8,6 @@ size = Vector2(32, 32)
 
 [node name="Actor" type="CharacterBody2D" unique_id=1795983393]
 script = ExtResource("1_phrn4")
-is_friendly = null
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=313402948]
 position = Vector2(-63.000004, -55)

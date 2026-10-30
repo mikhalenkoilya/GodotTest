@@ -5,22 +5,15 @@ class_name SkillData
 @export_multiline var description: String = "Describe what the skill does."
 @export var icon: Texture2D
 
-@export_group("Combat Mechanics")
+@export_group("Targeting & Economy")
 @export var cooldown: int = 2
-@export var damage_multiplier: float = 1.0
-
-# 🆕 GDD: Multi-hit & Bypass Support
-@export var hit_count: int = 1 # Dimachaerus Flurry = 3
-@export var armor_bypass_percent: float = 0.0 # Thraex Passive = 0.1, Velites = 0.25
-
-@export_group("Targeting & Shape")
-@export var attack_pattern: AttackPattern
 @export var cast_range: int = 1
+@export var min_range: int = 0 # GDD: Retiarius Net cannot target adjacent (set to 2)
+@export var ends_attack_phase: bool = true # GDD default
 
-@export_group("Economy")
-# GDD: "Using any active skill immediately ends the Attack phase"
-@export var ends_attack_phase: bool = true 
-# GDD: Disarm prevents skills whose primary effect is dealing damage
-@export var is_damage_dealing: bool = true 
+@export_group("Effects")
+@export var effects: Array[SkillEffect] = []
 
-@export var applies_status: StatusEffect # e.g., Retiarius Net (Root), Scissor (Disarm)
+@export_group("Restrictions")
+@export var requires_melee: bool = false
+@export var blocked_by_disarm: bool = true # GDD: Damage skills blocked by disarm

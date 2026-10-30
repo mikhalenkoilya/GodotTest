@@ -15,3 +15,7 @@ extends Resource
 @export var sprite_frames: SpriteFrames
 
 @export var skills: Array[SkillData] = []
+
+@export var passive_armor_bypass: float = 0.0 
+
+@export var immune_to_forced_movement: bool = false 
