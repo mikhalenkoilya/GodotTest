@@ -18,6 +18,9 @@ var is_dead: bool = false
 # 🔄 Отслеживание оставшихся ответных атак в текущем раунде
 var remaining_counter_attacks: int = 0
 
+# Add these to the top of actor.gd with your other variables
+var active_statuses: Dictionary = {} # Stores { "StatusName": remaining_turns }
+
 const FRIENDLY_COLOR = Color(0.35, 0.75, 1.0)
 const ENEMY_COLOR = Color(1.0, 0.35, 0.35)
 
@@ -84,60 +87,46 @@ func perform_attack(target: Node2D = null) -> void:
 	if not is_dead and sprite:
 		sprite.play("idle")
 
-func take_damage(amount: int, type: ClassData.AttackType) -> void:
+func take_damage(raw_damage: int, attack_type: ClassData.AttackType, armor_bypass_percent: float = 0.0, applied_status: StatusEffect = null) -> void:
 	if is_dead: return
-	
-	var type_name = "Физического" if type == ClassData.AttackType.PHYSICAL else "Магического"
-	print("⚔️ %s получает %d %s урона!" % [name, amount, type_name])
-	
-	# 1. Применяем урон к соответствующему щиту
-	if type == ClassData.AttackType.PHYSICAL:
-		if current_armor > 0:
-			var absorbed = mini(current_armor, amount)
-			current_armor -= absorbed
-			amount -= absorbed # Остаток уходит в HP
-	elif type == ClassData.AttackType.MAGIC:
-		if current_magic_resist > 0:
-			var absorbed = mini(current_magic_resist, amount)
-			current_magic_resist -= absorbed
-			amount -= absorbed # Остаток уходит в HP
-			
-	# 2. Применяем остаток урона к HP
-	if amount > 0:
-		current_health = maxi(current_health - amount, 0)
-		
-	print("🛡️ Броня: %d/%d | ✨ Сопр: %d/%d | ❤️ HP: %d/%d" % [
-		current_armor, max_armor, 
-		current_magic_resist, max_magic_resist, 
-		current_health, max_health
-	])
-	
-	# 3. Анимации
-	if sprite:
-		sprite.play("hit")
-		await sprite.animation_finished
-		
-		if current_health <= 0:
-			die()
-		elif not is_dead:
-			sprite.play("idle")
-	else:
-		if current_health <= 0:
-			die()
 
-func die() -> void:
-	if is_dead: return
-	
-	is_dead = true
-	current_health = 0
-	
-	if sprite:
-		sprite.play("death")
-		await sprite.animation_finished
-	
-	visible = false
-	print(" %s погиб!" % name)
-	died.emit(self)
+	# 1. Calculate Armor Bypass (GDD: Thraex 10%, Velites 25%)
+	var bypass_damage = int(raw_damage * armor_bypass_percent)
+	var remaining_damage = raw_damage - bypass_damage
+
+	# 2. Resolve against Armor / Magic Resist
+	if attack_type == ClassData.AttackType.PHYSICAL:
+		if current_armor > 0 and remaining_damage > 0:
+			var absorbed = mini(current_armor, remaining_damage)
+			current_armor -= absorbed
+			remaining_damage -= absorbed # Overflow damage
+		
+		# Whatever is left (bypass + overflow) hits HP
+		var total_hp_damage = bypass_damage + remaining_damage
+		if total_hp_damage > 0:
+			current_health = maxi(current_health - total_hp_damage, 0)
+			
+	elif attack_type == ClassData.AttackType.MAGIC:
+		if current_magic_resist > 0 and remaining_damage > 0:
+			var absorbed = mini(current_magic_resist, remaining_damage)
+			current_magic_resist -= absorbed
+			remaining_damage -= absorbed
+			
+		var total_hp_damage = bypass_damage + remaining_damage
+		if total_hp_damage > 0:
+			current_health = maxi(current_health - total_hp_damage, 0)
+
+	print("💥 %s takes %d HP damage! (Armor: %d, HP: %d/%d)" % [name, bypass_damage + remaining_damage, current_armor, current_health, max_health])
+
+	# 3. Apply Status Effect (if the attack inflicts one, e.g., Retiarius Net, Murmillo Shield Bash)
+	if applied_status != null and not is_dead:
+		apply_status(applied_status)
+
+	# 4. Check Death
+	if current_health <= 0:
+		die()
+	elif not is_dead and sprite:
+		sprite.play("idle")
 
 func move_to(target_global_pos: Vector2) -> void:
 	if is_dead: return
@@ -182,16 +171,25 @@ var active_statuses: Dictionary = {} # e.g., {"Stun": 1, "Root": 1}
 func has_status(status_name: String) -> bool:
 	return active_statuses.has(status_name) and active_statuses[status_name] > 0
 
-func consume_status_duration(status_name: String) -> void:
-	if active_statuses.has(status_name):
+func consume_status_durations() -> void:
+	var statuses_to_remove = []
+	for status_name in active_statuses.keys():
 		active_statuses[status_name] -= 1
 		if active_statuses[status_name] <= 0:
-			active_statuses.erase(status_name)
+			statuses_to_remove.append(status_name)
+	
+	for status_name in statuses_to_remove:
+		active_statuses.erase(status_name)
+		print("✅ %s is no longer affected by [%s]." % [name, status_name])
 
 func reset_turn_state() -> void:
 	remaining_counter_attacks = class_data.max_counter_attacks if class_data else 0
-	# Optionally decrement all status durations here at turn start
-	for status in active_statuses.keys():
-		active_statuses[status] -= 1
-		if active_statuses[status] <= 0:
-			active_statuses.erase(status)
+	consume_status_durations() # GDD: Status durations tick down at the start of the actor's turn
+
+func apply_status(status: StatusEffect) -> void:
+	if not active_statuses.has(status.status_name):
+		active_statuses[status.status_name] = 0
+	
+	# Overwrite duration if the new application is longer (or just add, depending on your design)
+	active_statuses[status.status_name] = max(active_statuses[status.status_name], status.duration)
+	print("⚠️ %s is now affected by [%s] for %d turn(s)!" % [name, status.status_name, active_statuses[status.status_name]])
