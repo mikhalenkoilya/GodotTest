@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="ClassData" format=3 uid="uid://cnfk22fedc64e"]
+
+[ext_resource type="Script" uid="uid://b217idjjy25pn" path="res://Scripts/class_data.gd" id="1_gvqsg"]
+[ext_resource type="Resource" uid="uid://bsw3mfqktfa30" path="res://data/AttackShapes/cross_1.tres" id="1_rm2ou"]
+[ext_resource type="Script" uid="uid://cqmosy6l3e36c" path="res://Scripts/skill_data.gd" id="2_ccmgm"]
+[ext_resource type="SpriteFrames" uid="uid://bywsnduprwm76" path="res://data/abilities/warrior.res" id="4_oyrah"]
+
+[resource]
+script = ExtResource("1_gvqsg")
+display_name = "Dimachaerus"
+attack_damage = 12
+move_range = 3
+initiative = 14
+attack_pattern = ExtResource("1_rm2ou")
+sprite_frames = ExtResource("4_oyrah")
+metadata/_custom_type_script = "uid://b217idjjy25pn"

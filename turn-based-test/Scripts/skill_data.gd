@@ -8,7 +8,6 @@ class_name SkillData
 @export_group("Combat Mechanics")
 @export var cooldown: int = 2
 @export var damage_multiplier: float = 1.0
-@export var attack_type: ClassData.AttackType = ClassData.AttackType.PHYSICAL
 
 # 🆕 GDD: Multi-hit & Bypass Support
 @export var hit_count: int = 1 # Dimachaerus Flurry = 3

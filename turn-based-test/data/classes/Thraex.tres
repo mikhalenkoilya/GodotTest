@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="ClassData" format=3 uid="uid://cquwsy6n64kkl"]
+
+[ext_resource type="Resource" uid="uid://bsw3mfqktfa30" path="res://data/AttackShapes/cross_1.tres" id="1_nyi5p"]
+[ext_resource type="Script" uid="uid://b217idjjy25pn" path="res://Scripts/class_data.gd" id="1_oxvdw"]
+[ext_resource type="Script" uid="uid://cqmosy6l3e36c" path="res://Scripts/skill_data.gd" id="2_qp7gk"]
+[ext_resource type="SpriteFrames" uid="uid://bywsnduprwm76" path="res://data/abilities/warrior.res" id="4_2ka3t"]
+
+[resource]
+script = ExtResource("1_oxvdw")
+display_name = "Thraex"
+max_hp = 30
+attack_damage = 16
+initiative = 10
+max_armor = 20
+attack_pattern = ExtResource("1_nyi5p")
+sprite_frames = ExtResource("4_2ka3t")
+metadata/_custom_type_script = "uid://b217idjjy25pn"

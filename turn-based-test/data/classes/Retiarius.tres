@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="ClassData" format=3 uid="uid://dxv5h1s2us3cw"]
+
+[ext_resource type="Script" uid="uid://b217idjjy25pn" path="res://Scripts/class_data.gd" id="1_ah3t6"]
+[ext_resource type="Script" uid="uid://cqmosy6l3e36c" path="res://Scripts/skill_data.gd" id="2_k7uyq"]
+[ext_resource type="SpriteFrames" uid="uid://bywsnduprwm76" path="res://data/abilities/warrior.res" id="3_k7uyq"]
+
+[resource]
+script = ExtResource("1_ah3t6")
+display_name = "Retiarius"
+move_range = 3
+initiative = 13
+max_armor = 15
+sprite_frames = ExtResource("3_k7uyq")
+metadata/_custom_type_script = "uid://b217idjjy25pn"

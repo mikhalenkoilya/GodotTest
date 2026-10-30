@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="ClassData" format=3 uid="uid://cu7bwgmes6gw2"]
+
+[ext_resource type="Script" uid="uid://b217idjjy25pn" path="res://Scripts/class_data.gd" id="1_noi7j"]
+[ext_resource type="Resource" uid="uid://ei6ddmwsgq4a" path="res://data/AttackShapes/Square_3x3.tres" id="1_s478x"]
+[ext_resource type="Script" uid="uid://cqmosy6l3e36c" path="res://Scripts/skill_data.gd" id="2_sxf7w"]
+[ext_resource type="SpriteFrames" uid="uid://bywsnduprwm76" path="res://data/abilities/warrior.res" id="4_qr85a"]
+
+[resource]
+script = ExtResource("1_noi7j")
+display_name = "Crupellarius"
+max_hp = 35
+attack_damage = 12
+move_range = 1
+initiative = 2
+max_armor = 35
+attack_pattern = ExtResource("1_s478x")
+sprite_frames = ExtResource("4_qr85a")
+metadata/_custom_type_script = "uid://b217idjjy25pn"

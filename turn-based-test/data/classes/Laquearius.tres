@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="ClassData" format=3 uid="uid://r688286f2h41"]
+
+[ext_resource type="Script" uid="uid://b217idjjy25pn" path="res://Scripts/class_data.gd" id="1_pgf8t"]
+[ext_resource type="Script" uid="uid://cqmosy6l3e36c" path="res://Scripts/skill_data.gd" id="2_4ll2s"]
+
+[resource]
+script = ExtResource("1_pgf8t")
+display_name = "Laquearius"
+attack_damage = 11
+move_range = 3
+initiative = 9
+max_armor = 25
+metadata/_custom_type_script = "uid://b217idjjy25pn"

@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="ClassData" format=3 uid="uid://5vabonv5t48b"]
+
+[ext_resource type="Script" uid="uid://b217idjjy25pn" path="res://Scripts/class_data.gd" id="1_dwd7c"]
+[ext_resource type="Resource" uid="uid://btdr45dyjg6lc" path="res://data/AttackShapes/cross_2.tres" id="1_rvpqm"]
+[ext_resource type="Script" uid="uid://cqmosy6l3e36c" path="res://Scripts/skill_data.gd" id="2_rvpqm"]
+
+[resource]
+script = ExtResource("1_dwd7c")
+display_name = "Hoplomachus"
+max_hp = 30
+attack_damage = 13
+initiative = 7
+max_armor = 20
+attack_pattern = ExtResource("1_rvpqm")
+metadata/_custom_type_script = "uid://b217idjjy25pn"

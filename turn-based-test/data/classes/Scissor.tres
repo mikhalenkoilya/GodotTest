@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="ClassData" format=3 uid="uid://cqw0iv55e3a5n"]
+
+[ext_resource type="Script" uid="uid://b217idjjy25pn" path="res://Scripts/class_data.gd" id="1_ioj6t"]
+[ext_resource type="Resource" uid="uid://bsw3mfqktfa30" path="res://data/AttackShapes/cross_1.tres" id="1_olf7j"]
+[ext_resource type="Script" uid="uid://cqmosy6l3e36c" path="res://Scripts/skill_data.gd" id="2_olf7j"]
+
+[resource]
+script = ExtResource("1_ioj6t")
+display_name = "Scissor"
+initiative = 6
+max_armor = 25
+attack_pattern = ExtResource("1_olf7j")
+metadata/_custom_type_script = "uid://b217idjjy25pn"

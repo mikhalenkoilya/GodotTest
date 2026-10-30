@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="ClassData" format=3 uid="uid://c135x2r2q3ou6"]
+
+[ext_resource type="Resource" uid="uid://pbxtv6vglkge" path="res://data/AttackShapes/cross_3.tres" id="1_7yhua"]
+[ext_resource type="Script" uid="uid://b217idjjy25pn" path="res://Scripts/class_data.gd" id="1_xb5ls"]
+[ext_resource type="Script" uid="uid://cqmosy6l3e36c" path="res://Scripts/skill_data.gd" id="2_doga4"]
+[ext_resource type="SpriteFrames" uid="uid://bywsnduprwm76" path="res://data/abilities/warrior.res" id="4_6dnse"]
+
+[resource]
+script = ExtResource("1_xb5ls")
+display_name = "Velites"
+move_range = 3
+initiative = 5
+max_armor = 15
+attack_pattern = ExtResource("1_7yhua")
+sprite_frames = ExtResource("4_6dnse")
+metadata/_custom_type_script = "uid://b217idjjy25pn"
