@@ -5,6 +5,10 @@ class_name SkillData
 @export_multiline var description: String = "Describe what the skill does."
 @export var icon: Texture2D
 
+@export_group("Economy")
+@export var ends_attack_phase: bool = true # GDD: Using any active skill immediately ends the Attack phase
+@export var is_damage_dealing: bool = true # For Disarm checks
+
 @export_group("Combat Mechanics")
 # How many turns the player must wait before using this skill again
 @export var cooldown: int = 2 
