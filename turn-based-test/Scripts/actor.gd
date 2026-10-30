@@ -177,3 +177,21 @@ func get_cooldown_remaining(skill: SkillData) -> int:
 	if current_cooldowns.has(skill.display_name):
 		return current_cooldowns[skill.display_name]
 	return 0
+var active_statuses: Dictionary = {} # e.g., {"Stun": 1, "Root": 1}
+
+func has_status(status_name: String) -> bool:
+	return active_statuses.has(status_name) and active_statuses[status_name] > 0
+
+func consume_status_duration(status_name: String) -> void:
+	if active_statuses.has(status_name):
+		active_statuses[status_name] -= 1
+		if active_statuses[status_name] <= 0:
+			active_statuses.erase(status_name)
+
+func reset_turn_state() -> void:
+	remaining_counter_attacks = class_data.max_counter_attacks if class_data else 0
+	# Optionally decrement all status durations here at turn start
+	for status in active_statuses.keys():
+		active_statuses[status] -= 1
+		if active_statuses[status] <= 0:
+			active_statuses.erase(status)
