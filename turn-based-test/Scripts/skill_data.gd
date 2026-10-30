@@ -5,19 +5,23 @@ class_name SkillData
 @export_multiline var description: String = "Describe what the skill does."
 @export var icon: Texture2D
 
-@export_group("Economy")
-@export var ends_attack_phase: bool = true # GDD: Using any active skill immediately ends the Attack phase
-@export var is_damage_dealing: bool = true # For Disarm checks
-
 @export_group("Combat Mechanics")
-# How many turns the player must wait before using this skill again
-@export var cooldown: int = 2 
-# Multiplies the actor's base attack_damage (1.0 = 100%, 1.5 = 150%)
-@export var damage_multiplier: float = 1.0 
+@export var cooldown: int = 2
+@export var damage_multiplier: float = 1.0
 @export var attack_type: ClassData.AttackType = ClassData.AttackType.PHYSICAL
 
+# 🆕 GDD: Multi-hit & Bypass Support
+@export var hit_count: int = 1 # Dimachaerus Flurry = 3
+@export var armor_bypass_percent: float = 0.0 # Thraex Passive = 0.1, Velites = 0.25
+
 @export_group("Targeting & Shape")
-# Reusing your existing AttackPattern resource for the 1x3 shape!
-@export var attack_pattern: AttackPattern 
-# How far the skill can reach (1 = melee, 2+ = ranged)
-@export var cast_range: int = 1 
+@export var attack_pattern: AttackPattern
+@export var cast_range: int = 1
+
+@export_group("Economy")
+# GDD: "Using any active skill immediately ends the Attack phase"
+@export var ends_attack_phase: bool = true 
+# GDD: Disarm prevents skills whose primary effect is dealing damage
+@export var is_damage_dealing: bool = true 
+
+@export var applies_status: StatusEffect # e.g., Retiarius Net (Root), Scissor (Disarm)
