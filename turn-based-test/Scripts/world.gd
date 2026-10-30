@@ -11,14 +11,12 @@ func _ready() -> void:
 	enemy_squad_classes = SquadManager.generate_random_enemy_squad(3)
 	print("🎲 Random Enemy Squad Generated: ", enemy_squad_classes)
 	
-	_spawn_enemies() # ✅ Don't forget this from the previous fix!
+	_spawn_enemies()
 	
 	if turn_manager:
-		# ✅ Connect the game_over signal to our new function
 		turn_manager.game_over.connect(_on_game_over)
-		
 		await get_tree().process_frame
-		turn_manager.initialize_game()
+		turn_manager.start_battle() 
 	else:
 		push_error("TurnManager not found at $Tiles/TurnManager!")
 
