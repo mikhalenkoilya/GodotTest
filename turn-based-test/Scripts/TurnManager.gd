@@ -275,15 +275,21 @@ func _resolve_attack(attacker: Actor, target: Actor) -> void:
 	await get_tree().create_timer(0.2).timeout
 	
 	if is_instance_valid(attacker) and is_instance_valid(target) and not target.is_dead:
-		await target.take_damage(attacker.attack_damage)
+		# Basic attacks have 0% armor bypass by default (unless class passive says otherwise)
+		var bypass = 0.0
+		# Note: If you add Thraex passive later, you can check: 
+		# if attacker.class_data.class_name == "Thraex": bypass = 0.1
 		
+		await target.take_damage(attacker.attack_damage, bypass, null)
+		
+	# Counter-attack logic (Respects GDD skills like Overwatch)
 	if is_instance_valid(target) and not target.is_dead and target.has_method("can_counter_attack") and target.can_counter_attack():
 		if "remaining_counter_attacks" in target:
 			target.remaining_counter_attacks -= 1
 		print("🔄 %s контратакует %s!" % [target.name, attacker.name])
 		await target.perform_attack(attacker)
 		if is_instance_valid(attacker) and not attacker.is_dead:
-			await attacker.take_damage(target.attack_damage)
+			await attacker.take_damage(target.attack_damage, 0.0, null)
 
 # MARK: - AI Logic (Per-Actor)
 func _execute_ai_turn(actor: Actor) -> void:

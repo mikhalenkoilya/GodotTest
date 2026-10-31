@@ -1,10 +1,9 @@
-[gd_resource type="Resource" script_class="AttackPattern" format=3 uid="uid://bsw3mfqktfa30"]
+[gd_resource type="Resource" script_class="AttackPattern" format=3 uid="uid://cross1shape0001"]
 
-[ext_resource type="Script" uid="uid://bii4bskxhjtt7" path="res://Scripts/attack_pattern.gd" id="1_55jme"]
+[ext_resource type="Script" path="res://Scripts/attack_pattern.gd" id="1_script"]
 
 [resource]
-script = ExtResource("1_55jme")
+script = ExtResource("1_script")
 pattern_name = "cross_1"
-max_range_heuristic = 2
-relative_cells = Array[Vector2i]([Vector2i(0, -2), Vector2i(0, -1), Vector2i(-2, 0), Vector2i(-1, 0), Vector2i(2, 0), Vector2i(1, 0), Vector2i(0, 2), Vector2i(0, 1)])
-metadata/_custom_type_script = "uid://bii4bskxhjtt7"
+max_range_heuristic = 1
+relative_cells = [Vector2i(0, -1), Vector2i(0, 1), Vector2i(-1, 0), Vector2i(1, 0)]

@@ -49,11 +49,8 @@ func update_player_stats(actor: Actor) -> void:
 		hp_label.text = "❤️ HP: %d/%d" % [actor.current_health, actor.class_data.max_hp]
 		dmg_label.text = "⚔️ DMG: %d" % actor.class_data.attack_damage
 		move_label.text = "👟 MOVE: %d" % actor.class_data.move_range
-		
-		# FIX: Show Current / Max Armor
 		if armor_label:
-			var cur_armor = actor.current_armor if "current_armor" in actor else actor.class_data.max_armor
-			armor_label.text = "🛡️ ARMOR: %d/%d" % [cur_armor, actor.class_data.max_armor]
+			armor_label.text = "🛡️ ARMOR: %d/%d" % [actor.current_armor, actor.class_data.max_armor]
 		
 		skill_panel.visible = true
 		_update_skill_buttons(actor)

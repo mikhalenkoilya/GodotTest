@@ -14,7 +14,7 @@ var current_health: int = 0
 var current_armor: int = 0
 var is_dead: bool = false
 var remaining_counter_attacks: int = 0
-var active_statuses: Dictionary = {} 
+var active_statuses: Array[StatusEffect] = []
 var current_cooldowns: Dictionary = {} 
 
 # 🆕 GDD: Temporary Buffs & Overrides (Provocator, Crupellarius, Hoplomachus)
@@ -45,6 +45,7 @@ var is_stunned: bool = false
 var is_rooted: bool = false
 var is_disarmed: bool = false
 
+
 # Optional: Track turn duration for status effects (e.g., "Stunned for 1 turn")
 var stun_duration: int = 0
 var root_duration: int = 0
@@ -60,32 +61,38 @@ func clear_status_effects() -> void:
 	disarm_duration = 0
 
 # Helper to apply status effects cleanly
-func apply_status_effect(effect_name: String, duration: int = 1) -> void:
-	match effect_name.to_lower():
-		"stun":
-			is_stunned = true
-			stun_duration = duration
-		"root":
-			is_rooted = true
-			root_duration = duration
-		"disarm":
-			is_disarmed = true
-			disarm_duration = duration
+func apply_status_effect(status: StatusEffect) -> void:
+	# Update duration if status already exists
+	for i in range(active_statuses.size()):
+		if active_statuses[i].status_name == status.status_name:
+			active_statuses[i].duration = status.duration
+			print("🔄 Обновлен эффект %s на %s: %d ход(ов)" % [status.status_name, name, status.duration])
+			_update_status_flags()
+			return
+	
+	active_statuses.append(status)
+	print("🔗 %s получил эффект: %s на %d ход(ов)" % [name, status.status_name, status.duration])
+	_update_status_flags()
 
-# Call this at the end of the actor's turn or round to tick down durations
 func update_status_effects() -> void:
-	if stun_duration > 0:
-		stun_duration -= 1
-		if stun_duration <= 0: is_stunned = false
-		
-	if root_duration > 0:
-		root_duration -= 1
-		if root_duration <= 0: is_rooted = false
-		
-	if disarm_duration > 0:
-		disarm_duration -= 1
-		if disarm_duration <= 0: is_disarmed = false
+	# Tick down durations at the start of the actor's turn
+	for i in range(active_statuses.size() - 1, -1, -1):
+		active_statuses[i].duration -= 1
+		if active_statuses[i].duration <= 0:
+			print("✅ Эффект %s на %s закончился" % [active_statuses[i].status_name, name])
+			active_statuses.remove_at(i)
+	
+	_update_status_flags()
 
+func _update_status_flags() -> void:
+	is_stunned = false
+	is_rooted = false
+	is_disarmed = false
+	for status in active_statuses:
+		match status.type:
+			StatusEffect.Type.STUN: is_stunned = true
+			StatusEffect.Type.ROOT: is_rooted = true
+			StatusEffect.Type.DISARM: is_disarmed = true
 
 func _ready() -> void:
 	if not class_data:
@@ -130,61 +137,50 @@ func perform_attack(target: Node2D = null) -> void:
 		sprite.play("idle")
 func die() -> void:
 	if is_dead: return
-	
 	is_dead = true
 	current_health = 0
-	
-	# Проигрываем анимацию смерти, если она есть в SpriteFrames
 	if sprite:
-		if sprite.sprite_frames.has_animation("death"):
-			sprite.play("death")
-			await sprite.animation_finished
-		else:
-			push_warning("⚠️ Анимация 'death' не найдена в SpriteFrames для %s" % name)
-	
-	# Скрываем актера и отключаем физическое тело
+		sprite.play("death")
+		await sprite.animation_finished
 	visible = false
-	set_physics_process(false)
-	set_process(false)
-	
 	print("💀 %s погиб!" % name)
-	
-	# Отправляем сигнал в TurnManager, чтобы убрать актера из очереди
 	died.emit(self)
 	
-# 🔄 FIXED: Added attack_type to support Thraex Passive
-func take_damage(raw_damage: int, armor_bypass_percent: float = 0.0, applied_status: StatusEffect = null) -> void:
+func take_damage(amount: int, armor_bypass_percent: float = 0.0, status_to_apply: StatusEffect = null) -> void:
 	if is_dead: return
 
-	# GDD: Provocator Taunt damage reduction
-	var final_damage = int(raw_damage * (1.0 - damage_reduction))
+	# 1. Calculate Armor Bypass (GDD: Thraex 10%, Velites 25%)
+	var bypass_damage = int(amount * armor_bypass_percent)
+	var shield_damage = amount - bypass_damage
 
-	# GDD: Combine skill bypass (Velites) with class passive bypass (Thraex)
-	var total_bypass_percent = armor_bypass_percent
-	total_bypass_percent += class_data.passive_armor_bypass
-		
-	var bypass_damage = int(final_damage * total_bypass_percent)
-	var remaining_damage = final_damage - bypass_damage
+	print("⚔️ %s получает %d урона! (Пробивает броню: %d)" % [name, amount, bypass_damage])
 
-	# Resolve against Armor
-	if current_armor > 0 and remaining_damage > 0:
-		var absorbed = mini(current_armor, remaining_damage)
+	# 2. Absorb damage with Armor
+	if current_armor > 0 and shield_damage > 0:
+		var absorbed = mini(current_armor, shield_damage)
 		current_armor -= absorbed
-		remaining_damage -= absorbed 
-	
-	var total_hp_damage = bypass_damage + remaining_damage
+		shield_damage -= absorbed
+
+	# 3. Apply remaining shield damage + bypass damage directly to HP
+	var total_hp_damage = shield_damage + bypass_damage
 	if total_hp_damage > 0:
 		current_health = maxi(current_health - total_hp_damage, 0)
-		
-	print("💥 %s takes %d HP damage! (Armor: %d, HP: %d/%d)" % [name, total_hp_damage, current_armor, current_health, max_health])
 
-	if applied_status != null and not is_dead:
-		apply_status(applied_status)
+	print("🛡️ Броня: %d/%d | ❤️ HP: %d/%d" % [current_armor, max_armor, current_health, max_health])
+
+	# 4. Animations
+	if sprite:
+		sprite.play("hit")
+		await sprite.animation_finished
 
 	if current_health <= 0:
 		die()
-	elif not is_dead and sprite:
+	elif not is_dead:
 		sprite.play("idle")
+
+	# 5. Apply Status Effect (e.g., Root from Net, Stun from Shield Bash)
+	if status_to_apply != null and not is_dead:
+		apply_status_effect(status_to_apply)
 
 func move_to(target_global_pos: Vector2) -> void:
 	if is_dead: return
