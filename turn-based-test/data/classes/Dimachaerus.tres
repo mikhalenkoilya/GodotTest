@@ -10,7 +10,6 @@ script = ExtResource("1_gvqsg")
 display_name = "Dimachaerus"
 attack_damage = 12
 move_range = 3
-initiative = 14
 attack_pattern = ExtResource("1_rm2ou")
 sprite_frames = ExtResource("4_oyrah")
 metadata/_custom_type_script = "uid://b217idjjy25pn"

@@ -4,13 +4,13 @@ extends Node
 @onready var hp_label: Label = $UIContainer/HBoxContainer/PlayerStats/HPLabel
 @onready var dmg_label: Label = $UIContainer/HBoxContainer/PlayerStats/DmgLabel
 @onready var move_label: Label = $UIContainer/HBoxContainer/PlayerStats/MoveLabel
-@onready var range_label: Label = $UIContainer/HBoxContainer/PlayerStats/RangeLabel
 @onready var armor_label: Label = $UIContainer/HBoxContainer/PlayerStats/ArmorLabel
 
 @onready var target_name_label: Label = $UIContainer/HBoxContainer/TargetStats/NameLabel
 @onready var target_hp_label: Label = $UIContainer/HBoxContainer/TargetStats/HPLabel
 @onready var target_dmg_label: Label = $UIContainer/HBoxContainer/TargetStats/DmgLabel
 @onready var target_move_label: Label = $UIContainer/HBoxContainer/TargetStats/MoveLabel
+@onready var target_armor_label: Label = $UIContainer/HBoxContainer/TargetStats/ArmorLabel
 
 var skill_panel: PanelContainer = null
 var skill_container: HBoxContainer = null
@@ -49,10 +49,11 @@ func update_player_stats(actor: Actor) -> void:
 		hp_label.text = "❤️ HP: %d/%d" % [actor.current_health, actor.class_data.max_hp]
 		dmg_label.text = "⚔️ DMG: %d" % actor.class_data.attack_damage
 		move_label.text = "👟 MOVE: %d" % actor.class_data.move_range
-		range_label.text = "🏹 RANGE: %d" % actor.class_data.attack_range
 		
+		# FIX: Show Current / Max Armor
 		if armor_label:
-			armor_label.text = "🛡️ ARMOR: %d" % actor.class_data.max_armor
+			var cur_armor = actor.current_armor if "current_armor" in actor else actor.class_data.max_armor
+			armor_label.text = "🛡️ ARMOR: %d/%d" % [cur_armor, actor.class_data.max_armor]
 		
 		skill_panel.visible = true
 		_update_skill_buttons(actor)
@@ -107,9 +108,14 @@ func update_target_stats(target: Actor) -> void:
 		target_hp_label.text = "❤️ HP: %d/%d" % [target.current_health, target.class_data.max_hp]
 		target_dmg_label.text = "⚔️ DMG: %d" % target.class_data.attack_damage
 		target_move_label.text = "👟 MOVE: %d" % target.class_data.move_range
+	
+		if target_armor_label:
+			var cur_armor = target.current_armor if "current_armor" in target else target.class_data.max_armor
+			target_armor_label.text = "🛡️ ARMOR: %d/%d" % [cur_armor, target.class_data.max_armor]
 
 func clear_target_stats() -> void:
 	target_name_label.text = ""
 	target_hp_label.text = ""
 	target_dmg_label.text = ""
 	target_move_label.text = ""
+	target_armor_label.text = ""

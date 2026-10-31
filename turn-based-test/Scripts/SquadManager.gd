@@ -17,17 +17,16 @@ func remove_from_squad(actor: Actor) -> void:
 	squad_members.erase(actor)
 	
 var available_classes: Array[String] = [
-	"res://data/classes/warrior.tres",
-	"res://data/classes/archer.tres",
-	"res://data/classes/mage.tres",
-	"res://data/classes/spearman.tres"
+	"res://data/classes/Dimachaerus.tres",
+	"res://data/classes/Retiarius.tres",
+	"res://data/classes/Thraex.tres"
 ]
 
-# 🔄 UPDATED: Start empty, will be populated dynamically
+
 var squad_classes: Array[String] = [
-	"res://data/classes/warrior.tres",
-	"res://data/classes/spearman.tres",
-	"res://data/classes/archer.tres"
+	"res://data/classes/Dimachaerus.tres",
+	"res://data/classes/Retiarius.tres",
+	"res://data/classes/Thraex.tres"
 ]
 
 # 🔄 NEW: Generate a random squad of enemies

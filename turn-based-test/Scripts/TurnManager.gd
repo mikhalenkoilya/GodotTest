@@ -1,310 +1,510 @@
+@tool
 extends Node2D
 
-# ─── SIGNALS ───
-signal turn_started(actor: Actor)
-signal phase_changed(actor: Actor, new_phase: Phase)
-signal actor_moved(actor: Actor, old_cell: Vector2i, new_cell: Vector2i)
-signal actor_attacked(attacker: Actor, target: Actor)
-signal turn_ended(actor: Actor)
+# MARK: - Signals
+signal turn_changed(is_player_turn: bool)
 signal game_over(player_won: bool)
 
-# ─── ENUMS ───
-enum Phase { MOVE, ATTACK, BUSY, OVER }
+# MARK: - Node References
+var tile_map: TileMapLayer = null
+var grid_layer: TileMapLayer = null
+var combat_ui: Node = null
 
-# ─── STATE VARIABLES ───
+# MARK: - Actor Management
+var friendly_actors: Array[Actor] = []
+var enemy_actors: Array[Actor] = []
+
+# MARK: - Initiative & Turn Queue
 var turn_queue: Array[Actor] = []
 var current_actor: Actor = null
+var actor_start_global_pos: Vector2 = Vector2.ZERO
+
+# MARK: - Grid & Highlighting
+var reachable_cells: Dictionary = {}
+var highlighted_cells: Array[Vector2i] = []
+const TILE_SOURCE_ID = 0
+const HIGHLIGHT_ATLAS_COORDS = Vector2i(0, 0)
+const ATTACK_ATLAS_COORDS = Vector2i(1, 0)
+
+# MARK: - Phase State
+enum Phase { MOVE, ATTACK }
 var current_phase: Phase = Phase.MOVE
-var reachable_cells: Array[Vector2i] = []
-var attackable_cells: Array[Vector2i] = []
+var is_processing_move: bool = false
 
-# ─── NODE REFERENCES ───
-@onready var tile_map: TileMapLayer = $"../TileMap" 
-@onready var grid_layer: TileMapLayer = $"../TileMap/GridLayer" 
-@onready var combat_ui = $"../CanvasLayer/CombatUI" 
+# MARK: - UI & Cursors
+var ui_layer: CanvasLayer = null
+var end_turn_button: Button = null
+const CURSOR_SWORD = preload("res://ART/cursors/sword.png")
+const CURSOR_DEFAULT = preload("res://ART/cursors/arrow.png")
+const CURSOR_HOTSPOT = Vector2(16, 16)
 
-var is_processing: bool = false
+# MARK: - Lifecycle
+func _ready() -> void:
+	if Engine.is_editor_hint(): return
 
-# ─── INITIALIZATION ───
+	tile_map = get_parent() as TileMapLayer
+	grid_layer = tile_map.get_node_or_null("GridLayer") as TileMapLayer
+	combat_ui = get_tree().root.find_child("CombatUI", true, false)
+
+	_create_end_turn_button()
+	for child in get_children():
+		if child is Actor:
+			register_actor(child)
+
 func register_actor(actor: Actor) -> void:
-	if not turn_queue.has(actor):
-		turn_queue.append(actor)
+	if actor.is_friendly:
+		friendly_actors.append(actor)
+	else:
+		enemy_actors.append(actor)
+	if not actor.died.is_connected(_on_actor_died):
 		actor.died.connect(_on_actor_died)
 
-func build_initiative_queue() -> void:
-	turn_queue.sort_custom(func(a: Actor, b: Actor): 
-		return a.class_data.init > b.class_data.init
-	)
+func _on_actor_died(actor: Actor) -> void:
+	friendly_actors.erase(actor)
+	enemy_actors.erase(actor)
+	turn_queue.erase(actor)
+	
+	if current_actor == actor:
+		_advance_turn()
+		
+	actor.queue_free()
+	_check_win_conditions()
+
+func initialize_game() -> void:
+	_snap_all_actors_to_grid()
+	_start_new_round()
 
 func start_battle() -> void:
-	build_initiative_queue()
-	_start_next_turn()
+	initialize_game()
 
-# ─── TURN FLOW ───
-func _start_next_turn() -> void:
-	var friendly_alive = turn_queue.any(func(a: Actor): return a.is_friendly and not a.is_dead)
-	var enemy_alive = turn_queue.any(func(a: Actor): return not a.is_friendly and not a.is_dead)
+# MARK: - Initiative & Round Management
+func _start_new_round() -> void:
+	_build_turn_queue()
+	_advance_turn()
+
+func _build_turn_queue() -> void:
+	turn_queue.clear()
+	var all_actors: Array[Actor] = []
 	
-	if not friendly_alive:
-		current_phase = Phase.OVER # 🐞 FIXED: Removed underscore
-		game_over.emit(false)
-		return
-	if not enemy_alive:
-		current_phase = Phase.OVER # 🐞 FIXED: Removed underscore
-		game_over.emit(true)
-		return
+	for a in friendly_actors + enemy_actors:
+		if is_instance_valid(a) and not a.is_dead:
+			all_actors.append(a)
+
+	all_actors.sort_custom(func(a, b):
+		var init_a = _get_actor_initiative(a)
+		var init_b = _get_actor_initiative(b)
+		return init_a > init_b
+	)
+	
+	turn_queue = all_actors
+	print("🔄 Новый раунд! Очередь хода: ", turn_queue.map(func(a): return a.name))
+
+func _get_actor_initiative(actor: Actor) -> int:
+	return actor.class_data.initiative if actor.class_data else 0
+
+func _advance_turn() -> void:
+	_clear_highlight()
+	current_actor = null
+	current_phase = Phase.MOVE
+	Input.set_custom_mouse_cursor(CURSOR_DEFAULT, Input.CURSOR_ARROW, CURSOR_HOTSPOT)
 
 	if turn_queue.is_empty():
+		_start_new_round()
 		return
 
 	current_actor = turn_queue.pop_front()
-	
-	if current_actor.has_status("Stun"):
-		print("⚡ %s is Stunned and skips their turn!" % current_actor.name)
-		current_actor.consume_status_durations() 
-		_end_current_turn()
+	if not is_instance_valid(current_actor) or current_actor.is_dead:
+		_advance_turn()
 		return
 
-	current_actor.reset_turn_state()
-	
-	if current_actor.has_status("Root"):
-		print("⛓️ %s is Rooted and cannot move." % current_actor.name)
-		_switch_phase(Phase.ATTACK)
+	if current_actor.has_method("update_status_effects"):
+		current_actor.update_status_effects()
+
+	# Сохраняем стартовую позицию и автоматически выделяем персонажа
+	actor_start_global_pos = current_actor.global_position
+
+	if current_actor.is_friendly:
+		print("⚔️ Ваш ход: %s (Init: %d)" % [current_actor.name, _get_actor_initiative(current_actor)])
+		turn_changed.emit(true)
+		
+		# Автоматически показываем доступные ходы для текущего персонажа
+		if combat_ui:
+			combat_ui.update_player_stats(current_actor)
+		
+		if not _can_actor_act(current_actor):
+			print("⚠️ %s оглушен, ход пропущен." % current_actor.name)
+			await get_tree().create_timer(0.5).timeout
+			_complete_actor_turn()
+		else:
+			# Автоматически подсвечиваем доступные клетки для движения
+			_highlight_available_moves(current_actor)
 	else:
-		_switch_phase(Phase.MOVE)
-		
-	turn_started.emit(current_actor)
+		print("🤖 Ход врага: %s (Init: %d)" % [current_actor.name, _get_actor_initiative(current_actor)])
+		turn_changed.emit(false)
+		await get_tree().create_timer(0.4).timeout
+		await _execute_ai_turn(current_actor)
+		_complete_actor_turn()
 
-func _switch_phase(new_phase: Phase) -> void:
-	if current_phase == Phase.OVER:
-		return
-		
-	current_phase = new_phase
-	phase_changed.emit(current_actor, current_phase)
-	
-	if current_phase == Phase.MOVE:
-		_highlight_reachable_cells(current_actor)
-	elif current_phase == Phase.ATTACK:
-		_highlight_attackable_cells(current_actor)
-
-func _end_current_turn() -> void:
-	_clear_highlights()
-	turn_ended.emit(current_actor)
-	turn_queue.append(current_actor)
-	build_initiative_queue()
-	is_processing = false
-	await get_tree().create_timer(0.5).timeout
-	_start_next_turn()
-
-# ─── INPUT HANDLING ───
+# MARK: - Input Handling
 func _input(event: InputEvent) -> void:
-	if not current_actor or not current_actor.is_friendly or is_processing or current_phase == Phase.OVER or current_phase == Phase.BUSY:
+	if event is InputEventMouseMotion:
+		_update_hover_stats()
+		if tile_map:
+			var target_cell = tile_map.local_to_map(tile_map.get_local_mouse_position())
+			_update_attack_cursor(target_cell)
 		return
 
 	if event is InputEventKey and event.pressed and not event.is_echo():
+		# SPACEBAR: Skip current phase (Move -> Attack, or Attack -> End Turn)
 		if event.keycode == KEY_SPACE:
-			if current_phase == Phase.MOVE:
-				_switch_phase(Phase.ATTACK)
-			elif current_phase == Phase.ATTACK:
-				_end_current_turn()
+			if current_actor and current_actor.is_friendly and not is_processing_move:
+				if current_phase == Phase.MOVE:
+					# Skip movement, go to attack phase
+					_switch_to_attack_phase()
+				elif current_phase == Phase.ATTACK:
+					# Skip attack, end character's turn
+					_complete_actor_turn()
 			return
+
+		# E KEY: End the entire character's turn immediately
+		if event.keycode == KEY_E or event.is_action_pressed("end_turn"):
+			if current_actor and current_actor.is_friendly and not is_processing_move:
+				_complete_actor_turn()
+			return
+
+	# Block mouse input if it's not the player's turn or if processing
+	if Engine.is_editor_hint() or is_processing_move or not current_actor or not current_actor.is_friendly:
+		return
 
 	if event is InputEventMouseButton and event.pressed:
 		var target_cell = tile_map.local_to_map(tile_map.get_local_mouse_position())
 		if event.button_index == MOUSE_BUTTON_RIGHT:
-			_cancel_current_action()
+			_cancel_current_action()  # Right click cancels and returns to start pos
 		elif event.button_index == MOUSE_BUTTON_LEFT:
 			_handle_left_click(target_cell)
 
-func _handle_left_click(target_cell: Vector2i) -> void:
-	if current_phase == Phase.MOVE:
-		_attempt_move(target_cell)
-	elif current_phase == Phase.ATTACK:
-		_attempt_attack(target_cell)
+# MARK: - GDD Status Effect Checks
+func _can_actor_move(actor: Actor) -> bool:
+	var is_stunned = actor.get("is_stunned") if "is_stunned" in actor else false
+	var is_rooted = actor.get("is_rooted") if "is_rooted" in actor else false
+	return not (is_stunned or is_rooted)
 
-func attempt_skill(skill: SkillData, target_cell: Vector2i) -> void:
-	if current_phase != Phase.ATTACK or is_processing:
-		return
-	var target_actor = _get_actor_at_cell(target_cell)
-	if target_actor == null and skill.cast_range == 0:
-		target_actor = current_actor
-	_resolve_skill(current_actor, skill, target_actor, target_cell)
+func _can_actor_attack(actor: Actor) -> bool:
+	var is_stunned = actor.get("is_stunned") if "is_stunned" in actor else false
+	var is_disarmed = actor.get("is_disarmed") if "is_disarmed" in actor else false
+	return not (is_stunned or is_disarmed)
 
-func _attempt_move(target_cell: Vector2i) -> void:
-	if not current_actor.can_move():
-		print("🚫 %s is Rooted!" % current_actor.name)
-		return
-	if not reachable_cells.has(target_cell):
-		return 
+func _can_actor_act(actor: Actor) -> bool:
+	return _can_actor_move(actor) or _can_actor_attack(actor)
 
-	is_processing = true
-	current_phase = Phase.BUSY
-	var old_cell = tile_map.local_to_map(tile_map.to_local(current_actor.global_position))
-	
-	# 🐞 FIXED: Use to_global() to ensure correct coordinate space
-	var target_pos = tile_map.to_global(tile_map.map_to_local(target_cell))
-	await current_actor.move_to(target_pos)
-	
-	actor_moved.emit(current_actor, old_cell, target_cell)
-	_switch_phase(Phase.ATTACK)
-	is_processing = false
-
-func _attempt_attack(target_cell: Vector2i) -> void:
-	if not current_actor.can_attack():
-		print("🚫 %s cannot attack!" % current_actor.name)
-		return
-
-	var target_actor = _get_actor_at_cell(target_cell)
-	if not target_actor or target_actor.is_friendly == current_actor.is_friendly:
-		return
-	if not attackable_cells.has(target_cell):
-		return
-
-	is_processing = true
-	current_phase = Phase.BUSY
-	await _execute_basic_attack(current_actor, target_actor)
-	_end_current_turn()
-
+# MARK: - Action Handlers
 func _cancel_current_action() -> void:
-	_clear_highlights()
+	# Возвращаем персонажа на исходную позицию
+	if current_actor and current_actor.is_friendly:
+		if current_phase == Phase.MOVE:
+			# Если персонаж ещё не двигался, просто отменяем выделение
+			_clear_highlight()
+			current_phase = Phase.MOVE
+			Input.set_custom_mouse_cursor(CURSOR_DEFAULT, Input.CURSOR_ARROW, CURSOR_HOTSPOT)
+		elif current_phase == Phase.ATTACK:
+			# Если персонаж уже двигался, возвращаем его на стартовую позицию
+			print("↩️ Отмена хода: возврат %s на исходную позицию" % current_actor.name)
+			current_actor.global_position = actor_start_global_pos
+			_clear_highlight()
+			current_phase = Phase.MOVE
+			Input.set_custom_mouse_cursor(CURSOR_DEFAULT, Input.CURSOR_ARROW, CURSOR_HOTSPOT)
+			
+			# Показываем доступные ходы снова
+			if _can_actor_move(current_actor):
+				_highlight_available_moves(current_actor)
+
+func _handle_left_click(target_cell: Vector2i) -> void:
+	if not current_actor or not current_actor.is_friendly:
+		return
+
 	if current_phase == Phase.MOVE:
-		_highlight_reachable_cells(current_actor)
-	else:
-		_highlight_attackable_cells(current_actor)
+		if target_cell in reachable_cells:
+			is_processing_move = true
+			var move_success = await _try_move_actor(current_actor, target_cell)
+			is_processing_move = false
+			_clear_highlight()
+			
+			if move_success:
+				_switch_to_attack_phase()
+			else:
+				_highlight_available_moves(current_actor)
 
-# ─── COMBAT RESOLUTION ───
-func _execute_basic_attack(attacker: Actor, defender: Actor) -> void:
-	actor_attacked.emit(attacker, defender)
-	await attacker.perform_attack(defender)
-	if defender.is_dead: return
+	elif current_phase == Phase.ATTACK:
+		if not _can_actor_attack(current_actor):
+			_complete_actor_turn()
+			return
 
-	# 🐞 FIXED: Pass attack_type for Thraex passive calculation
-	await defender.take_damage(attacker.attack_damage, attacker.attack_type)
+		var is_valid_target = target_cell in highlighted_cells
 
-	if not defender.is_dead and defender.remaining_counter_attacks > 0:
-		var attacker_cell = tile_map.local_to_map(tile_map.to_local(attacker.global_position))
-		var defender_cell = tile_map.local_to_map(tile_map.to_local(defender.global_position))
-		if attacker_cell.distance_to(defender_cell) <= 1: 
-			defender.remaining_counter_attacks -= 1
-			print("🔄 %s counter-attacks!" % defender.name)
-			await defender.perform_attack(attacker)
-			if not attacker.is_dead:
-				await attacker.take_damage(defender.attack_damage, defender.attack_type)
+		if not is_valid_target:
+			_complete_actor_turn()
+			return
 
-func _resolve_skill(actor: Actor, skill: SkillData, target: Actor, target_cell: Vector2i) -> void:
-	var actor_cell = tile_map.local_to_map(tile_map.to_local(actor.global_position))
-	if skill.min_range > 0 and actor_cell.distance_to(target_cell) < skill.min_range:
-		print("🚫 Target is too close for %s!" % skill.display_name)
+		# АТАКУЕМ ТОЛЬКО ВЫБРАННУЮ ЦЕЛЬ!
+		var target_enemy = _get_actor_at_cell(target_cell, enemy_actors)
+		if target_enemy:
+			await _resolve_attack(current_actor, target_enemy)
+
+		_complete_actor_turn()
+
+func _switch_to_attack_phase() -> void:
+	current_phase = Phase.ATTACK
+	_highlight_attack_range(current_actor)
+
+func _complete_actor_turn() -> void:
+	_clear_highlight()
+	current_phase = Phase.MOVE
+	Input.set_custom_mouse_cursor(CURSOR_DEFAULT, Input.CURSOR_ARROW, CURSOR_HOTSPOT)
+
+	_advance_turn()
+
+func _on_end_turn_button_pressed() -> void:
+	if not current_actor or not current_actor.is_friendly or is_processing_move:
+		return
+	
+	_complete_actor_turn()
+
+# MARK: - Combat Resolution Helper
+func _resolve_attack(attacker: Actor, target: Actor) -> void:
+	await attacker.perform_attack(target)
+	await get_tree().create_timer(0.2).timeout
+	
+	if is_instance_valid(attacker) and is_instance_valid(target) and not target.is_dead:
+		await target.take_damage(attacker.attack_damage)
+		
+	if is_instance_valid(target) and not target.is_dead and target.has_method("can_counter_attack") and target.can_counter_attack():
+		if "remaining_counter_attacks" in target:
+			target.remaining_counter_attacks -= 1
+		print("🔄 %s контратакует %s!" % [target.name, attacker.name])
+		await target.perform_attack(attacker)
+		if is_instance_valid(attacker) and not attacker.is_dead:
+			await attacker.take_damage(target.attack_damage)
+
+# MARK: - AI Logic (Per-Actor)
+func _execute_ai_turn(actor: Actor) -> void:
+	if not _can_actor_act(actor):
 		return
 
-	if actor.has_status("Disarm") and skill.blocked_by_disarm:
-		print("🚫 %s is Disarmed!" % actor.name)
-		return
+	var target_player = _find_closest_friendly(actor)
+	if not target_player: return
 
-	is_processing = true
-	current_phase = Phase.BUSY
+	var ai_cell = tile_map.local_to_map(tile_map.to_local(actor.global_position))
+	var user_cell = tile_map.local_to_map(tile_map.to_local(target_player.global_position))
+	var can_attack_now = _is_cell_in_attack_pattern(ai_cell, user_cell, actor)
 
-	for effect in skill.effects:
-		await effect.execute(actor, target, skill, self)
+	if not can_attack_now and _can_actor_move(actor):
+		var move_range = actor.class_data.move_range if actor.class_data else 3
+		if actor.get("is_rooted"): move_range = 0
 
-	actor.put_skill_on_cooldown(skill)
+		var ai_reachable = _calculate_reachable_cells(ai_cell, move_range)
+		var best_cell = ai_cell
+		var best_distance = 99999
+		var can_attack_from_best = false
 
-	if skill.ends_attack_phase:
-		_end_current_turn()
-	else:
-		_switch_phase(Phase.ATTACK)
-		is_processing = false
+		for cell in ai_reachable:
+			var can_attack = _is_cell_in_attack_pattern(cell, user_cell, actor)
+			var dist = abs(user_cell.x - cell.x) + abs(user_cell.y - cell.y)
+			
+			if can_attack and not can_attack_from_best:
+				can_attack_from_best = true
+				best_cell = cell
+				best_distance = dist
+			elif can_attack == can_attack_from_best and dist < best_distance:
+				best_cell = cell
+				best_distance = dist
 
-# ─── HELPERS & HIGHLIGHTING ───
-func _get_actor_at_cell(cell: Vector2i) -> Actor:
-	for actor in turn_queue:
-		if actor.is_dead: continue
-		var actor_cell = tile_map.local_to_map(tile_map.to_local(actor.global_position))
-		if actor_cell == cell:
-			return actor
-	return null
+		if best_cell != ai_cell:
+			print("🤖 %s moving to %s" % [actor.name, best_cell])
+			await _try_move_actor_direct(actor, best_cell)
+			ai_cell = tile_map.local_to_map(tile_map.to_local(actor.global_position))
+			user_cell = tile_map.local_to_map(tile_map.to_local(target_player.global_position))
 
-func _is_wall_at_cell(cell: Vector2i) -> bool:
-	# TODO: Replace with your actual TileMap wall checking logic
-	return false 
+	if _is_cell_in_attack_pattern(ai_cell, user_cell, actor) and _can_actor_attack(actor):
+		print("🤖 %s атакует %s" % [actor.name, target_player.name])
+		await _resolve_attack(actor, target_player)
 
-func _get_valid_adjacent_cell(actor: Actor, target: Actor) -> Vector2i:
-	var actor_cell = tile_map.local_to_map(tile_map.to_local(actor.global_position))
-	var directions = [Vector2i(0, -1), Vector2i(0, 1), Vector2i(-1, 0), Vector2i(1, 0)]
-	var target_cell = tile_map.local_to_map(tile_map.to_local(target.global_position))
-	var dir_to_target = (target_cell - actor_cell).normalized()
-	
-	directions.sort_custom(func(a, b): 
-		return a.distance_squared_to(dir_to_target) < b.distance_squared_to(dir_to_target)
-	)
-	
-	for dir in directions:
-		var test_cell = actor_cell + dir
-		if not _get_actor_at_cell(test_cell) and not _is_wall_at_cell(test_cell):
-			return test_cell
-	return Vector2i(-1, -1)
+func _find_closest_friendly(enemy: Actor) -> Actor:
+	var closest: Actor = null
+	var min_dist = 99999
+	var enemy_cell = tile_map.local_to_map(tile_map.to_local(enemy.global_position))
 
-# 🆕 IMPLEMENTED: Actual Flood-Fill Pathfinding for Movement
-func _highlight_reachable_cells(actor: Actor) -> void:
-	_clear_highlights()
-	if not actor.can_move():
-		reachable_cells = []
-	else:
-		var max_steps = actor.class_data.move_range if actor.class_data else 0
-		reachable_cells = _calculate_reachable_cells(actor, max_steps)
-	if combat_ui:
-		combat_ui.show_move_highlights(reachable_cells)
+	for player in friendly_actors:
+		if is_instance_valid(player) and not player.is_dead:
+			var p_cell = tile_map.local_to_map(tile_map.to_local(player.global_position))
+			var dist = abs(enemy_cell.x - p_cell.x) + abs(enemy_cell.y - p_cell.y)
+			if dist < min_dist:
+				min_dist = dist
+				closest = player
+	return closest
 
-# 🆕 IMPLEMENTED: Pattern Matching for Attacks
-func _highlight_attackable_cells(actor: Actor) -> void:
-	_clear_highlights()
-	var pattern = actor.current_basic_attack_pattern
-	attackable_cells = _calculate_attackable_cells(actor, pattern)
-	if combat_ui:
-		combat_ui.show_attack_highlights(attackable_cells)
+# MARK: - Grid & Highlighting Helpers
+func _is_cell_in_attack_pattern(actor_cell: Vector2i, target_cell: Vector2i, actor: Actor) -> bool:
+	if not actor.class_data or not actor.class_data.attack_pattern:
+		return (abs(target_cell.x - actor_cell.x) + abs(target_cell.y - actor_cell.y)) <= 1
+	for offset in actor.class_data.attack_pattern.relative_cells:
+		if actor_cell + offset == target_cell: return true
+	return false
 
-func _calculate_reachable_cells(actor: Actor, max_steps: int) -> Array[Vector2i]:
-	var reachable = []
-	var start_cell = tile_map.local_to_map(tile_map.to_local(actor.global_position))
-	var queue = [{"cell": start_cell, "steps": 0}]
-	var visited = {start_cell: true}
-	
-	while queue.size() > 0:
+func _get_tile_cost(cell: Vector2i) -> int:
+	if not tile_map: return 1
+	var tile_data = tile_map.get_cell_tile_data(cell)
+	if not tile_data: return 1
+	var cost = tile_data.get_custom_data("move_cost")
+	return 9999 if cost <= 0 else cost
+
+func _calculate_reachable_cells(start_cell: Vector2i, max_cost: int) -> Dictionary:
+	var reachable = {}
+	var queue = [[start_cell, 0]]
+	reachable[start_cell] = 0
+
+	while not queue.is_empty():
 		var current = queue.pop_front()
-		if current.steps > 0:
-			reachable.append(current.cell)
-		if current.steps < max_steps:
-			for dir in [Vector2i(0, -1), Vector2i(0, 1), Vector2i(-1, 0), Vector2i(1, 0)]:
-				var next_cell = current.cell + dir
-				if not visited.has(next_cell) and not _is_wall_at_cell(next_cell) and not _get_actor_at_cell(next_cell):
-					visited[next_cell] = true
-					queue.append({"cell": next_cell, "steps": current.steps + 1})
+		var cell: Vector2i = current[0]
+		var cost: int = current[1]
+
+		for n in [cell + Vector2i(1, 0), cell + Vector2i(-1, 0), cell + Vector2i(0, 1), cell + Vector2i(0, -1)]:
+			if reachable.has(n): continue
+			var tile_cost = _get_tile_cost(n)
+			if tile_cost >= 9999 or _is_cell_occupied(n): continue
+			var new_cost = cost + tile_cost
+			if new_cost <= max_cost:
+				reachable[n] = new_cost
+				queue.append([n, new_cost])
+
+	reachable.erase(start_cell)
 	return reachable
 
-func _calculate_attackable_cells(actor: Actor, pattern: AttackPattern) -> Array[Vector2i]:
-	var attackable = []
-	if not pattern: return attackable
+func _highlight_available_moves(actor: Actor) -> void:
+	_clear_highlight()
+	if not _can_actor_move(actor): return
+
 	var actor_cell = tile_map.local_to_map(tile_map.to_local(actor.global_position))
-	for offset in pattern.relative_cells:
-		var target_cell = actor_cell + offset
-		if target_cell != actor_cell: # Prevent attacking self
-			attackable.append(target_cell)
-	return attackable
+	var move_range = actor.class_data.move_range if actor.class_data else 3
+	var source_id = _get_valid_source_id()
+	reachable_cells = _calculate_reachable_cells(actor_cell, move_range)
 
-func _clear_highlights() -> void:
+	for cell in reachable_cells:
+		grid_layer.set_cell(cell, source_id, HIGHLIGHT_ATLAS_COORDS)
+		highlighted_cells.append(cell)
+
+func _highlight_attack_range(actor: Actor) -> void:
+	_clear_highlight()
+	var actor_cell = tile_map.local_to_map(tile_map.to_local(actor.global_position))
+	var source_id = _get_valid_source_id()
+	var attack_cells: Array[Vector2i] = []
+
+	if actor.class_data and actor.class_data.attack_pattern:
+		for offset in actor.class_data.attack_pattern.relative_cells:
+			attack_cells.append(actor_cell + offset)
+	else:
+		for x in range(-1, 2):
+			for y in range(-1, 2):
+				if abs(x) + abs(y) <= 1 and (x != 0 or y != 0):
+					attack_cells.append(actor_cell + Vector2i(x, y))
+
+	for cell in attack_cells:
+		if cell != actor_cell:
+			grid_layer.set_cell(cell, source_id, ATTACK_ATLAS_COORDS)
+			highlighted_cells.append(cell)
+
+func _clear_highlight() -> void:
+	if not grid_layer: return
+	for cell in highlighted_cells:
+		grid_layer.set_cell(cell, -1, Vector2i(-1, -1))
+	highlighted_cells.clear()
 	reachable_cells.clear()
-	attackable_cells.clear()
-	if combat_ui:
-		combat_ui.clear_highlights()
 
-func _on_actor_died(actor: Actor) -> void:
-	if turn_queue.has(actor):
-		turn_queue.erase(actor)
-	if current_actor == actor:
-		_end_current_turn()
-	
-	var friendly_alive = turn_queue.any(func(a: Actor): return a.is_friendly and not a.is_dead)
-	var enemy_alive = turn_queue.any(func(a: Actor): return not a.is_friendly and not a.is_dead)
-	if not friendly_alive or not enemy_alive:
-		current_phase = Phase.OVER
-		game_over.emit(friendly_alive)
+# MARK: - Movement & Collision Helpers
+func _try_move_actor(actor: Actor, target_cell: Vector2i) -> bool:
+	if _is_cell_occupied(target_cell) or not reachable_cells.has(target_cell): return false
+	var target_global_pos = tile_map.to_global(tile_map.map_to_local(target_cell))
+	await actor.move_to(target_global_pos)
+	return true
+
+func _try_move_actor_direct(actor: Actor, target_cell: Vector2i) -> bool:
+	if _is_cell_occupied(target_cell): return false
+	var target_global_pos = tile_map.to_global(tile_map.map_to_local(target_cell))
+	await actor.move_to(target_global_pos)
+	return true
+
+func _is_cell_occupied(cell: Vector2i) -> bool:
+	for actor in friendly_actors + enemy_actors:
+		if is_instance_valid(actor) and not actor.is_dead:
+			if cell == tile_map.local_to_map(tile_map.to_local(actor.global_position)): return true
+	return false
+
+func _get_actor_at_cell(cell: Vector2i, list: Array[Actor]) -> Actor:
+	for actor in list:
+		if is_instance_valid(actor) and not actor.is_dead:
+			if cell == tile_map.local_to_map(tile_map.to_local(actor.global_position)): return actor
+	return null
+
+func _get_valid_source_id() -> int:
+	var source_id = TILE_SOURCE_ID
+	if grid_layer and grid_layer.tile_set and grid_layer.tile_set.get_source_count() > 0:
+		var first_id = grid_layer.tile_set.get_source_id(0)
+		if source_id == 0 and first_id != -1: source_id = first_id
+	return source_id
+
+func _snap_all_actors_to_grid() -> void:
+	if not tile_map: return
+	for actor in friendly_actors + enemy_actors:
+		if is_instance_valid(actor):
+			var cell = tile_map.local_to_map(tile_map.to_local(actor.global_position))
+			actor.global_position = tile_map.to_global(tile_map.map_to_local(cell))
+
+# MARK: - UI Helpers
+func _create_end_turn_button() -> void:
+	ui_layer = CanvasLayer.new()
+	ui_layer.layer = 10
+	add_child(ui_layer)
+
+	end_turn_button = Button.new()
+	end_turn_button.text = "End Turn"
+	end_turn_button.size = Vector2(120, 40)
+	end_turn_button.anchor_left = 1.0; end_turn_button.anchor_right = 1.0
+	end_turn_button.anchor_top = 1.0; end_turn_button.anchor_bottom = 1.0
+	end_turn_button.offset_left = -140; end_turn_button.offset_right = -20
+	end_turn_button.offset_top = -60; end_turn_button.offset_bottom = -20
+	end_turn_button.pressed.connect(_on_end_turn_button_pressed)
+	ui_layer.add_child(end_turn_button)
+
+func _update_hover_stats() -> void:
+	if not tile_map: return
+	var local_mouse_pos = tile_map.get_local_mouse_position()
+	var target_cell = tile_map.local_to_map(local_mouse_pos)
+	var hovered_actor = _get_actor_at_cell(target_cell, friendly_actors + enemy_actors)
+
+	if combat_ui:
+		if hovered_actor:
+			combat_ui.update_target_stats(hovered_actor)
+		else:
+			combat_ui.clear_target_stats()
+
+func _update_attack_cursor(target_cell: Vector2i) -> void:
+	if current_phase != Phase.ATTACK or not current_actor:
+		Input.set_custom_mouse_cursor(CURSOR_DEFAULT, Input.CURSOR_ARROW, CURSOR_HOTSPOT)
+		return
+
+	var target_enemy = _get_actor_at_cell(target_cell, enemy_actors)
+	var is_valid_target = target_enemy != null and target_cell in highlighted_cells
+
+	if is_valid_target:
+		# Always use the sword cursor for valid attack targets
+		Input.set_custom_mouse_cursor(CURSOR_SWORD, Input.CURSOR_ARROW, CURSOR_HOTSPOT)
+	else:
+		Input.set_custom_mouse_cursor(CURSOR_DEFAULT, Input.CURSOR_ARROW, CURSOR_HOTSPOT)
+
+func _check_win_conditions() -> void:
+	var live_friendlies = friendly_actors.filter(func(a): return is_instance_valid(a) and not a.is_dead)
+	var live_enemies = enemy_actors.filter(func(e): return is_instance_valid(e) and not e.is_dead)
+
+	if live_friendlies.is_empty():
+		game_over.emit(false)
+	elif live_enemies.is_empty():
+		game_over.emit(true)

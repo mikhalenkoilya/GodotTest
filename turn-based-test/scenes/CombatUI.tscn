@@ -44,13 +44,7 @@ layout_mode = 2
 [node name="MoveLabel" type="Label" parent="UIContainer/HBoxContainer/PlayerStats" unique_id=449897490]
 layout_mode = 2
 
-[node name="RangeLabel" type="Label" parent="UIContainer/HBoxContainer/PlayerStats" unique_id=1470727339]
-layout_mode = 2
-
 [node name="ArmorLabel" type="Label" parent="UIContainer/HBoxContainer/PlayerStats" unique_id=751082994]
-layout_mode = 2
-
-[node name="MRLabel" type="Label" parent="UIContainer/HBoxContainer/PlayerStats" unique_id=227297870]
 layout_mode = 2
 
 [node name="TargetStats" type="VBoxContainer" parent="UIContainer/HBoxContainer" unique_id=1506133656]
@@ -71,11 +65,5 @@ layout_mode = 2
 [node name="MoveLabel" type="Label" parent="UIContainer/HBoxContainer/TargetStats" unique_id=624736246]
 layout_mode = 2
 
-[node name="RangeLabel" type="Label" parent="UIContainer/HBoxContainer/TargetStats" unique_id=371950163]
-layout_mode = 2
-
 [node name="ArmorLabel" type="Label" parent="UIContainer/HBoxContainer/TargetStats" unique_id=501738718]
-layout_mode = 2
-
-[node name="MRLabel" type="Label" parent="UIContainer/HBoxContainer/TargetStats" unique_id=125839671]
 layout_mode = 2

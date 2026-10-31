@@ -40,6 +40,53 @@ var current_basic_attack_pattern: AttackPattern:
 			return _basic_attack_pattern_override
 		return attack_pattern if attack_pattern else (class_data.attack_pattern if class_data else null)
 
+# MARK: - GDD Status Effects
+var is_stunned: bool = false
+var is_rooted: bool = false
+var is_disarmed: bool = false
+
+# Optional: Track turn duration for status effects (e.g., "Stunned for 1 turn")
+var stun_duration: int = 0
+var root_duration: int = 0
+var disarm_duration: int = 0
+
+# Call this at the start of a new round (TurnManager already calls this if it exists!)
+func clear_status_effects() -> void:
+	is_stunned = false
+	is_rooted = false
+	is_disarmed = false
+	stun_duration = 0
+	root_duration = 0
+	disarm_duration = 0
+
+# Helper to apply status effects cleanly
+func apply_status_effect(effect_name: String, duration: int = 1) -> void:
+	match effect_name.to_lower():
+		"stun":
+			is_stunned = true
+			stun_duration = duration
+		"root":
+			is_rooted = true
+			root_duration = duration
+		"disarm":
+			is_disarmed = true
+			disarm_duration = duration
+
+# Call this at the end of the actor's turn or round to tick down durations
+func update_status_effects() -> void:
+	if stun_duration > 0:
+		stun_duration -= 1
+		if stun_duration <= 0: is_stunned = false
+		
+	if root_duration > 0:
+		root_duration -= 1
+		if root_duration <= 0: is_rooted = false
+		
+	if disarm_duration > 0:
+		disarm_duration -= 1
+		if disarm_duration <= 0: is_disarmed = false
+
+
 func _ready() -> void:
 	if not class_data:
 		push_warning("⚠️ Actor '%s' is missing Class Data!" % name)

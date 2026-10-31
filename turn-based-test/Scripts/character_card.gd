@@ -38,11 +38,8 @@ func update_ui() -> void:
 		hp_label.text = "❤️ HP: " + str(class_data.max_hp)
 		dmg_label.text = "⚔️ DMG: " + str(class_data.attack_damage)
 		move_label.text = " MOVE: " + str(class_data.move_range)
-		range_label.text = "🏹 RANGE: " + str(class_data.attack_range)
 		if armor_label:
 			armor_label.text = "🛡️ ARMOR: " + str(class_data.max_armor)
-		if magic_label:
-			magic_label.text = "✨ M.RES: " + str(class_data.max_magic_resist)		
 
 func _on_prev_pressed() -> void:
 	SquadManager.cycle_class(slot_index, -1)
