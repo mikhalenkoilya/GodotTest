@@ -27,6 +27,10 @@ window/size/borderless=true
 window/stretch/mode="viewport"
 window/stretch/scale_mode="integer_scale"
 
+[editor_plugins]
+
+enabled=PackedStringArray("res://addons/gut/plugin.cfg")
+
 [input]
 
 click={

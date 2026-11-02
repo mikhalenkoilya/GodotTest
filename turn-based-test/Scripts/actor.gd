@@ -8,7 +8,7 @@ signal died(actor: Actor)
 @export var class_sprite_frames: SpriteFrames
 @export var attack_pattern: AttackPattern
 
-@onready var sprite: AnimatedSprite2D = $AnimatedSprite2D
+@onready var sprite: AnimatedSprite2D = get_node_or_null("AnimatedSprite2D")
 
 var current_health: int = 0
 var current_armor: int = 0
@@ -45,7 +45,6 @@ var is_stunned: bool = false
 var is_rooted: bool = false
 var is_disarmed: bool = false
 
-
 # Optional: Track turn duration for status effects (e.g., "Stunned for 1 turn")
 var stun_duration: int = 0
 var root_duration: int = 0
@@ -62,16 +61,19 @@ func clear_status_effects() -> void:
 
 # Helper to apply status effects cleanly
 func apply_status_effect(status: StatusEffect) -> void:
+	# FIX: Duplicate the resource to prevent modifying the base shared resource
+	var new_status = status.duplicate()
+	
 	# Update duration if status already exists
 	for i in range(active_statuses.size()):
-		if active_statuses[i].status_name == status.status_name:
-			active_statuses[i].duration = status.duration
-			print("🔄 Обновлен эффект %s на %s: %d ход(ов)" % [status.status_name, name, status.duration])
+		if active_statuses[i].status_name == new_status.status_name:
+			active_statuses[i].duration = new_status.duration
+			print("🔄 Обновлен эффект %s на %s: %d ход(ов)" % [new_status.status_name, name, new_status.duration])
 			_update_status_flags()
 			return
 	
-	active_statuses.append(status)
-	print("🔗 %s получил эффект: %s на %d ход(ов)" % [name, status.status_name, status.duration])
+	active_statuses.append(new_status)
+	print("🔗 %s получил эффект: %s на %d ход(ов)" % [name, new_status.status_name, new_status.duration])
 	_update_status_flags()
 
 func update_status_effects() -> void:
@@ -105,12 +107,12 @@ func _ready() -> void:
 	if sprite and not sprite.is_playing():
 		sprite.play("idle")
 
-# 🆕 GDD: Status Gating Helpers
+# 🆕 GDD: Status Gating Helpers (FIXED: Use boolean flags instead of string matching)
 func can_move() -> bool:
-	return not has_status("Root") # GDD: Root prevents ALL movement
+	return not (is_stunned or is_rooted)
 
 func can_attack() -> bool:
-	return not has_status("Stun") and not has_status("Disarm")
+	return not (is_stunned or is_disarmed)
 
 func perform_attack(target: Node2D = null) -> void:
 	if is_dead: return
@@ -135,6 +137,7 @@ func perform_attack(target: Node2D = null) -> void:
 		
 	if not is_dead and sprite:
 		sprite.play("idle")
+
 func die() -> void:
 	if is_dead: return
 	is_dead = true
@@ -173,10 +176,11 @@ func take_damage(amount: int, armor_bypass_percent: float = 0.0, status_to_apply
 		sprite.play("hit")
 		await sprite.animation_finished
 
-	if current_health <= 0:
-		die()
-	elif not is_dead:
-		sprite.play("idle")
+		# FIX: Await die() so the turn doesn't advance until the death animation finishes
+		if current_health <= 0:
+			await die()
+		elif not is_dead and sprite: # <--- ✅ FIXED: Added 'and sprite' check
+			sprite.play("idle")
 
 	# 5. Apply Status Effect (e.g., Root from Net, Stun from Shield Bash)
 	if status_to_apply != null and not is_dead:
@@ -194,7 +198,6 @@ func move_to(target_global_pos: Vector2) -> void:
 # 🔄 FIXED: Clear temporary buffs and handle Hoplomachus override duration
 func reset_turn_state() -> void:
 	remaining_counter_attacks = class_data.max_counter_attacks if class_data else 0
-	consume_status_durations()
 	
 	# GDD: Crupellarius/Provocator buffs expire at the start of their next turn
 	temp_armor = 0
@@ -211,7 +214,7 @@ func _update_visuals() -> void:
 		sprite.modulate = FRIENDLY_COLOR if is_friendly else ENEMY_COLOR
 		sprite.flip_h = not is_friendly
 
-# --- Cooldown & Status Effect Management (Unchanged) ---
+# --- Cooldown & Status Effect Management ---
 func reduce_cooldowns() -> void:
 	for skill_name in current_cooldowns.keys():
 		current_cooldowns[skill_name] -= 1
@@ -229,21 +232,16 @@ func get_cooldown_remaining(skill: SkillData) -> int:
 		return current_cooldowns[skill.display_name]
 	return 0
 
+# FIX: Array iteration instead of Dictionary lookup
 func has_status(status_name: String) -> bool:
-	return active_statuses.has(status_name) and active_statuses[status_name] > 0
+	for status in active_statuses:
+		if status.status_name == status_name:
+			return true
+	return false
 
 func consume_status_durations() -> void:
-	var statuses_to_remove = []
-	for status_name in active_statuses.keys():
-		active_statuses[status_name] -= 1
-		if active_statuses[status_name] <= 0:
-			statuses_to_remove.append(status_name)
-	for status_name in statuses_to_remove:
-		active_statuses.erase(status_name)
-		print("✅ %s is no longer affected by [%s]." % [name, status_name])
+	# Logic is handled by update_status_effects() at the start of the turn to avoid double-ticking
+	pass
 
 func apply_status(status: StatusEffect) -> void:
-	if not active_statuses.has(status.status_name):
-		active_statuses[status.status_name] = 0
-	active_statuses[status.status_name] = max(active_statuses[status.status_name], status.duration)
-	print("⚠️ %s is now affected by [%s] for %d turn(s)!" % [name, status.status_name, active_statuses[status.status_name]])
+	apply_status_effect(status)

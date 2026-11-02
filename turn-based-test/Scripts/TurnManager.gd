@@ -38,6 +38,9 @@ const CURSOR_SWORD = preload("res://ART/cursors/sword.png")
 const CURSOR_DEFAULT = preload("res://ART/cursors/arrow.png")
 const CURSOR_HOTSPOT = Vector2(16, 16)
 
+# MARK: - Skill Tracking
+var selected_skill: SkillData = null
+
 # MARK: - Lifecycle
 func _ready() -> void:
 	if Engine.is_editor_hint(): return
@@ -45,6 +48,13 @@ func _ready() -> void:
 	tile_map = get_parent() as TileMapLayer
 	grid_layer = tile_map.get_node_or_null("GridLayer") as TileMapLayer
 	combat_ui = get_tree().root.find_child("CombatUI", true, false)
+	
+	# FIX: Connect UI signals to handle skill selection
+	if combat_ui:
+		if combat_ui.has_signal("basic_attack_selected"):
+			combat_ui.basic_attack_selected.connect(_on_basic_attack_selected)
+		if combat_ui.has_signal("skill_selected"):
+			combat_ui.skill_selected.connect(_on_skill_selected)
 
 	_create_end_turn_button()
 	for child in get_children():
@@ -106,6 +116,7 @@ func _advance_turn() -> void:
 	_clear_highlight()
 	current_actor = null
 	current_phase = Phase.MOVE
+	selected_skill = null
 	Input.set_custom_mouse_cursor(CURSOR_DEFAULT, Input.CURSOR_ARROW, CURSOR_HOTSPOT)
 
 	if turn_queue.is_empty():
@@ -183,16 +194,16 @@ func _input(event: InputEvent) -> void:
 		elif event.button_index == MOUSE_BUTTON_LEFT:
 			_handle_left_click(target_cell)
 
-# MARK: - GDD Status Effect Checks
+# MARK: - GDD Status Effect Checks (FIXED: Use safe method checking)
 func _can_actor_move(actor: Actor) -> bool:
-	var is_stunned = actor.get("is_stunned") if "is_stunned" in actor else false
-	var is_rooted = actor.get("is_rooted") if "is_rooted" in actor else false
-	return not (is_stunned or is_rooted)
+	if actor.has_method("can_move"):
+		return actor.can_move()
+	return not (actor.is_stunned or actor.is_rooted)
 
 func _can_actor_attack(actor: Actor) -> bool:
-	var is_stunned = actor.get("is_stunned") if "is_stunned" in actor else false
-	var is_disarmed = actor.get("is_disarmed") if "is_disarmed" in actor else false
-	return not (is_stunned or is_disarmed)
+	if actor.has_method("can_attack"):
+		return actor.can_attack()
+	return not (actor.is_stunned or actor.is_disarmed)
 
 func _can_actor_act(actor: Actor) -> bool:
 	return _can_actor_move(actor) or _can_actor_attack(actor)
@@ -248,7 +259,14 @@ func _handle_left_click(target_cell: Vector2i) -> void:
 		# АТАКУЕМ ТОЛЬКО ВЫБРАННУЮ ЦЕЛЬ!
 		var target_enemy = _get_actor_at_cell(target_cell, enemy_actors)
 		if target_enemy:
-			await _resolve_attack(current_actor, target_enemy)
+			# FIX: Execute selected skill if applicable, otherwise basic attack
+			if selected_skill and selected_skill.effects.size() > 0:
+				await _execute_skill(current_actor, target_enemy, selected_skill)
+			else:
+				await _resolve_attack(current_actor, target_enemy)
+				
+			if selected_skill:
+				current_actor.put_skill_on_cooldown(selected_skill)
 
 		_complete_actor_turn()
 
@@ -259,6 +277,7 @@ func _switch_to_attack_phase() -> void:
 func _complete_actor_turn() -> void:
 	_clear_highlight()
 	current_phase = Phase.MOVE
+	selected_skill = null
 	Input.set_custom_mouse_cursor(CURSOR_DEFAULT, Input.CURSOR_ARROW, CURSOR_HOTSPOT)
 
 	_advance_turn()
@@ -268,6 +287,26 @@ func _on_end_turn_button_pressed() -> void:
 		return
 	
 	_complete_actor_turn()
+
+# MARK: - Skill Handling (FIXED)
+func _on_basic_attack_selected() -> void:
+	selected_skill = null
+	if current_phase == Phase.MOVE and current_actor and current_actor.is_friendly:
+		_switch_to_attack_phase()
+		
+func _on_skill_selected(skill: SkillData) -> void:
+	selected_skill = skill
+	if current_phase == Phase.MOVE and current_actor and current_actor.is_friendly:
+		_switch_to_attack_phase()
+	elif current_phase == Phase.ATTACK:
+		# Update highlights dynamically if already in attack phase
+		_highlight_attack_range(current_actor)
+
+func _execute_skill(attacker: Actor, target: Actor, skill: SkillData) -> void:
+	print("✨ Executing skill: ", skill.display_name)
+	for effect in skill.effects:
+		if effect.has_method("execute"):
+			await effect.execute(attacker, target, skill, self)
 
 # MARK: - Combat Resolution Helper
 func _resolve_attack(attacker: Actor, target: Actor) -> void:
@@ -363,24 +402,29 @@ func _get_tile_cost(cell: Vector2i) -> int:
 	var cost = tile_data.get_custom_data("move_cost")
 	return 9999 if cost <= 0 else cost
 
+# FIX: Upgraded from BFS to Dijkstra-like Priority Queue to handle variable terrain costs correctly
 func _calculate_reachable_cells(start_cell: Vector2i, max_cost: int) -> Dictionary:
 	var reachable = {}
 	var queue = [[start_cell, 0]]
 	reachable[start_cell] = 0
 
 	while not queue.is_empty():
+		queue.sort_custom(func(a, b): return a[1] < b[1])
 		var current = queue.pop_front()
 		var cell: Vector2i = current[0]
 		var cost: int = current[1]
 
+		if reachable.has(cell) and reachable[cell] < cost:
+			continue
+
 		for n in [cell + Vector2i(1, 0), cell + Vector2i(-1, 0), cell + Vector2i(0, 1), cell + Vector2i(0, -1)]:
-			if reachable.has(n): continue
 			var tile_cost = _get_tile_cost(n)
 			if tile_cost >= 9999 or _is_cell_occupied(n): continue
 			var new_cost = cost + tile_cost
 			if new_cost <= max_cost:
-				reachable[n] = new_cost
-				queue.append([n, new_cost])
+				if not reachable.has(n) or reachable[n] > new_cost:
+					reachable[n] = new_cost
+					queue.append([n, new_cost])
 
 	reachable.erase(start_cell)
 	return reachable
@@ -398,13 +442,22 @@ func _highlight_available_moves(actor: Actor) -> void:
 		grid_layer.set_cell(cell, source_id, HIGHLIGHT_ATLAS_COORDS)
 		highlighted_cells.append(cell)
 
+# FIX: Dynamically calculate range based on selected skill or default attack pattern
 func _highlight_attack_range(actor: Actor) -> void:
 	_clear_highlight()
 	var actor_cell = tile_map.local_to_map(tile_map.to_local(actor.global_position))
 	var source_id = _get_valid_source_id()
 	var attack_cells: Array[Vector2i] = []
 
-	if actor.class_data and actor.class_data.attack_pattern:
+	if selected_skill:
+		var min_r = selected_skill.min_range
+		var max_r = selected_skill.cast_range
+		for x in range(-max_r, max_r + 1):
+			for y in range(-max_r, max_r + 1):
+				var dist = abs(x) + abs(y)
+				if dist >= min_r and dist <= max_r and (x != 0 or y != 0):
+					attack_cells.append(actor_cell + Vector2i(x, y))
+	elif actor.class_data and actor.class_data.attack_pattern:
 		for offset in actor.class_data.attack_pattern.relative_cells:
 			attack_cells.append(actor_cell + offset)
 	else:

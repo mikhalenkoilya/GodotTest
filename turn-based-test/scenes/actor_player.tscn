@@ -10,12 +10,10 @@ size = Vector2(32, 32)
 script = ExtResource("1_phrn4")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=313402948]
-position = Vector2(-63.000004, -55)
-scale = Vector2(0.8999999, 0.7533333)
+position = Vector2(-63.000008, -50)
+scale = Vector2(0.86000013, 0.6599999)
 sprite_frames = ExtResource("2_phrn4")
-animation = &"attack"
-frame = 3
-frame_progress = 1.0
+animation = &"walk"
 centered = false
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=121140727]

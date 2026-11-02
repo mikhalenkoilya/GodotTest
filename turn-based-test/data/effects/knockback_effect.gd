@@ -23,7 +23,7 @@ func execute(attacker: Actor, target: Actor, skill_data: SkillData, turn_manager
 		# GDD: Murmillo collision logic
 		if collision_damage_multiplier > 0.0:
 			var collision_dmg = int(attacker.class_data.attack_damage * collision_damage_multiplier)
-			await target.take_damage(collision_dmg, attacker.class_data.attack_type)
+			await target.take_damage(collision_dmg, 0.0, collision_status)
 		
 		if collision_status != null:
 			target.apply_status(collision_status)
