@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="AttackPattern" format=3 uid="uid://caetqcqp6tah7"]
+
+[ext_resource type="Script" uid="uid://bii4bskxhjtt7" path="res://Scripts/attack_pattern.gd" id="1_vyn6r"]
+
+[resource]
+script = ExtResource("1_vyn6r")
+pattern_name = "diamond_2_excl_cross_1"
+max_range_heuristic = 2
+relative_cells = Array[Vector2i]([Vector2i(0, -2), Vector2i(0, 2), Vector2i(-2, 0), Vector2i(2, 0), Vector2i(-1, -1), Vector2i(1, -1), Vector2i(-1, 1), Vector2i(1, 1)])
+metadata/_custom_type_script = "uid://bii4bskxhjtt7"

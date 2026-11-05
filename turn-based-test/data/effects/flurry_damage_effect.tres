@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="DamageEffect" format=3 uid="uid://cqkwe5sann0or"]
+
+[ext_resource type="Script" uid="uid://cuabxg0lekxj2" path="res://data/effects/damage_effect.gd" id="1_0s33j"]
+
+[resource]
+script = ExtResource("1_0s33j")
+damage_multiplier = 0.7
+hit_count = 3
+description = "Deals 0.7x ATK per hit, 3 times. Armor stripped per hit."
+metadata/_custom_type_script = "uid://bqew3cditwmkr"

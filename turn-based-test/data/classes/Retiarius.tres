@@ -4,6 +4,7 @@
 [ext_resource type="Resource" uid="uid://b8ghr2yi85pwr" path="res://data/AttackShapes/cross_2.tres" id="1_iw3ed"]
 [ext_resource type="Script" uid="uid://cqmosy6l3e36c" path="res://Scripts/skill_data.gd" id="2_k7uyq"]
 [ext_resource type="SpriteFrames" uid="uid://bywsnduprwm76" path="res://data/abilities/warrior.res" id="3_k7uyq"]
+[ext_resource type="Resource" uid="uid://j0mwdh3gf4p8" path="res://data/skills/net.tres" id="4_qmdth"]
 
 [resource]
 script = ExtResource("1_ah3t6")
@@ -13,4 +14,5 @@ initiative = 13
 max_armor = 15
 attack_pattern = ExtResource("1_iw3ed")
 sprite_frames = ExtResource("3_k7uyq")
+skills = Array[ExtResource("2_k7uyq")]([ExtResource("4_qmdth")])
 metadata/_custom_type_script = "uid://b217idjjy25pn"

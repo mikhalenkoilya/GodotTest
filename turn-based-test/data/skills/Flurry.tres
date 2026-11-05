@@ -1,9 +1,13 @@
-[gd_resource type="Resource" script_class="SkillData" format=3 uid="uid://6qxon6fk2h4r"]
+[gd_resource type="Resource" script_class="SkillData" format=3 uid="uid://b2mnhmcd5w53r"]
 
-[ext_resource type="Script" uid="uid://bqew3cditwmkr" path="res://Scripts/skill_effect.gd" id="1_ee45l"]
-[ext_resource type="Script" uid="uid://cqmosy6l3e36c" path="res://Scripts/skill_data.gd" id="2_2rvja"]
+[ext_resource type="Script" uid="uid://bqew3cditwmkr" path="res://Scripts/skill_effect.gd" id="1_o41u5"]
+[ext_resource type="Script" uid="uid://cqmosy6l3e36c" path="res://Scripts/skill_data.gd" id="2_sibid"]
+[ext_resource type="Resource" uid="uid://cqkwe5sann0or" path="res://data/effects/flurry_damage_effect.tres" id="2_y48fx"]
 
 [resource]
-script = ExtResource("2_2rvja")
-cast_range = 2
+script = ExtResource("2_sibid")
+display_name = "Flurry"
+description = "Unleashes a rapid flurry of 3 strikes on an adjacent target. Each strike deals 0.7x ATK physical damage. Armor is stripped per hit."
+cooldown = 3
+effects = Array[ExtResource("1_o41u5")]([ExtResource("2_y48fx")])
 metadata/_custom_type_script = "uid://cqmosy6l3e36c"

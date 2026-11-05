@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="SkillData" format=3 uid="uid://1c2cirebb618"]
+
+[ext_resource type="Script" uid="uid://bqew3cditwmkr" path="res://Scripts/skill_effect.gd" id="1_4fhb8"]
+[ext_resource type="Script" uid="uid://cqmosy6l3e36c" path="res://Scripts/skill_data.gd" id="2_3w4ub"]
+
+[resource]
+script = ExtResource("2_3w4ub")
+display_name = "Pinning Javelin"
+description = "Throws a javelin in a straight line. Deals 1.0x ATK physical damage and applies Slow (-1 Movement) for 1 turn."
+cooldown = 3
+cast_range = 3
+min_range = 2
+ends_attack_phase = true
+blocked_by_disarm = true
+effects = [ExtResource("2_effect")]
+metadata/_custom_type_script = "uid://cqmosy6l3e36c"

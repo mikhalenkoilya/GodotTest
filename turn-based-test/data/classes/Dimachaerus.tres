@@ -3,6 +3,7 @@
 [ext_resource type="Script" uid="uid://b217idjjy25pn" path="res://Scripts/class_data.gd" id="1_gvqsg"]
 [ext_resource type="Resource" uid="uid://b8ggr2yi85pwq" path="res://data/AttackShapes/cross_1.tres" id="1_rm2ou"]
 [ext_resource type="Script" uid="uid://cqmosy6l3e36c" path="res://Scripts/skill_data.gd" id="2_ccmgm"]
+[ext_resource type="Resource" uid="uid://b2mnhmcd5w53r" path="res://data/skills/flurry.tres" id="4_a6rga"]
 [ext_resource type="SpriteFrames" uid="uid://bywsnduprwm76" path="res://data/abilities/warrior.res" id="4_oyrah"]
 
 [resource]
@@ -12,4 +13,5 @@ attack_damage = 12
 move_range = 3
 attack_pattern = ExtResource("1_rm2ou")
 sprite_frames = ExtResource("4_oyrah")
+skills = Array[ExtResource("2_ccmgm")]([ExtResource("4_a6rga")])
 metadata/_custom_type_script = "uid://b217idjjy25pn"
