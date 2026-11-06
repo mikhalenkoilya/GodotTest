@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://vx7w320r13et"
-path="res://.godot/imported/blue&red.png-6cff357a2747f81b19e5539cb30d976d.ctex"
+uid="uid://s64syek6u6p"
+path="res://.godot/imported/Hopl.png-7d9fd1cf2a5210da8fd35498fb962283.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://ART/Tilemap/blue&red.png"
-dest_files=["res://.godot/imported/blue&red.png-6cff357a2747f81b19e5539cb30d976d.ctex"]
+source_file="res://ART/Hopl.png"
+dest_files=["res://.godot/imported/Hopl.png-7d9fd1cf2a5210da8fd35498fb962283.ctex"]
 
 [params]
 

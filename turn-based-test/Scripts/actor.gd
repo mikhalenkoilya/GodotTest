@@ -76,8 +76,9 @@ func apply_status_effect(status: StatusEffect) -> void:
 	print("🔗 %s получил эффект: %s на %d ход(ов)" % [name, new_status.status_name, new_status.duration])
 	_update_status_flags()
 
+# Call this at the END of the actor's turn to tick down durations 
 func update_status_effects() -> void:
-	# Tick down durations at the start of the actor's turn
+	# Tick down durations at the end of the actor's turn
 	for i in range(active_statuses.size() - 1, -1, -1):
 		active_statuses[i].duration -= 1
 		if active_statuses[i].duration <= 0:

@@ -3,9 +3,9 @@
 [ext_resource type="Script" uid="uid://clhvvs4m7est4" path="res://Scripts/world.gd" id="1_4mrxx"]
 [ext_resource type="PackedScene" uid="uid://bg6pdutko2jlr" path="res://scenes/CombatUI.tscn" id="2_e3hyu"]
 [ext_resource type="Script" uid="uid://cpgqxjldxpy06" path="res://Scripts/camera_2d.gd" id="2_w7kh3"]
-[ext_resource type="Texture2D" uid="uid://vx7w320r13et" path="res://ART/Tilemap/blue&red.png" id="3_71j4m"]
 [ext_resource type="Texture2D" uid="uid://bh5dqay47wguy" path="res://ART/Tilemap/grid.png" id="4_4mrxx"]
 [ext_resource type="Texture2D" uid="uid://dvjsl82u5wwge" path="res://ART/Tilemap/SSCAP Tileset/Outdoor.png" id="4_i7141"]
+[ext_resource type="Texture2D" uid="uid://d1nsf0ycqm3ei" path="res://ART/Tilemap/move+attack.png" id="5_i7141"]
 [ext_resource type="Script" uid="uid://qefyhqelaun" path="res://Scripts/TurnManager.gd" id="6_4mrxx"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_4mrxx"]
@@ -360,14 +360,14 @@ custom_data_layer_1/type = 0
 sources/1 = SubResource("TileSetAtlasSource_4mrxx")
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_7r4gi"]
-texture = ExtResource("3_71j4m")
+texture = ExtResource("5_i7141")
 texture_region_size = Vector2i(32, 32)
 0:0/0 = 0
 1:0/0 = 0
 
 [sub_resource type="TileSet" id="TileSet_81scy"]
 tile_size = Vector2i(32, 32)
-sources/0 = SubResource("TileSetAtlasSource_7r4gi")
+sources/1 = SubResource("TileSetAtlasSource_7r4gi")
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_w7kh3"]
 texture = ExtResource("4_4mrxx")

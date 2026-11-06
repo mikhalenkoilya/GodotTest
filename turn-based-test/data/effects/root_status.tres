@@ -1,8 +1,11 @@
-[gd_resource type="Resource" script_class="SkillEffect" format=3 uid="uid://pok64f1st5ga"]
+[gd_resource type="Resource" script_class="StatusEffect" format=3 uid="uid://pok64f1st5ga"]
 
-[ext_resource type="Script" uid="uid://bqew3cditwmkr" path="res://Scripts/skill_effect.gd" id="1_s6ngo"]
+[ext_resource type="Script" uid="uid://c7dbtt235wfdw" path="res://Scripts/status_effect.gd" id="1_status"]
 
 [resource]
-script = ExtResource("1_s6ngo")
+script = ExtResource("1_status")
+status_name = "Root"
+type = 0
+duration = 1
 description = "Movement set to 0. Prevents ALL forms of movement, including skill-based dashes."
-metadata/_custom_type_script = "uid://bqew3cditwmkr"
+metadata/_custom_type_script = "uid://c7dbtt235wfdw"

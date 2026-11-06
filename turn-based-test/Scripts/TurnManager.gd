@@ -22,7 +22,7 @@ var actor_start_global_pos: Vector2 = Vector2.ZERO
 # MARK: - Grid & Highlighting
 var reachable_cells: Dictionary = {}
 var highlighted_cells: Array[Vector2i] = []
-const TILE_SOURCE_ID = 0
+const TILE_SOURCE_ID = 1
 const HIGHLIGHT_ATLAS_COORDS = Vector2i(0, 0)
 const ATTACK_ATLAS_COORDS = Vector2i(1, 0)
 
@@ -128,9 +128,6 @@ func _advance_turn() -> void:
 		_advance_turn()
 		return
 
-	if current_actor.has_method("update_status_effects"):
-		current_actor.update_status_effects()
-
 	# Сохраняем стартовую позицию и автоматически выделяем персонажа
 	actor_start_global_pos = current_actor.global_position
 
@@ -157,7 +154,7 @@ func _advance_turn() -> void:
 		_complete_actor_turn()
 
 # MARK: - Input Handling
-func _input(event: InputEvent) -> void:
+func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventMouseMotion:
 		_update_hover_stats()
 		if tile_map:
@@ -275,6 +272,10 @@ func _switch_to_attack_phase() -> void:
 	_highlight_attack_range(current_actor)
 
 func _complete_actor_turn() -> void:
+	# ✅ NEW: Tick down status effects at the END of the actor's turn
+	if current_actor and current_actor.has_method("update_status_effects"):
+		current_actor.update_status_effects()
+		
 	_clear_highlight()
 	current_phase = Phase.MOVE
 	selected_skill = null
