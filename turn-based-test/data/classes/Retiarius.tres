@@ -5,6 +5,7 @@
 [ext_resource type="Script" uid="uid://cqmosy6l3e36c" path="res://Scripts/skill_data.gd" id="2_k7uyq"]
 [ext_resource type="SpriteFrames" uid="uid://bywsnduprwm76" path="res://data/abilities/warrior.res" id="3_k7uyq"]
 [ext_resource type="Resource" uid="uid://j0mwdh3gf4p8" path="res://data/skills/net.tres" id="4_qmdth"]
+[ext_resource type="Texture2D" uid="uid://50l8ukx0vodp" path="res://ART/Reti.png" id="6_07tdy"]
 
 [resource]
 script = ExtResource("1_ah3t6")
@@ -13,6 +14,7 @@ move_range = 3
 initiative = 13
 max_armor = 15
 attack_pattern = ExtResource("1_iw3ed")
+sprite_texture = ExtResource("6_07tdy")
 sprite_frames = ExtResource("3_k7uyq")
 skills = Array[ExtResource("2_k7uyq")]([ExtResource("4_qmdth")])
 metadata/_custom_type_script = "uid://b217idjjy25pn"

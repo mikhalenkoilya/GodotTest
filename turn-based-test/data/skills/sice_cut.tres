@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="SkillData" format=3 uid="uid://duq7vyb6pcwxs"]
+
+[ext_resource type="Script" uid="uid://cqmosy6l3e36c" path="res://Scripts/skill_data.gd" id="1_data"]
+[ext_resource type="Script" uid="uid://bqew3cditwmkr" path="res://Scripts/skill_effect.gd" id="2_effect"]
+
+[resource]
+script = ExtResource("1_data")
+display_name = "Sica Cut"
+description = "Strikes an adjacent enemy, dealing 1.2x ATK. 15% of damage bypasses Armor."
+metadata/_custom_type_script = "uid://cqmosy6l3e36c"

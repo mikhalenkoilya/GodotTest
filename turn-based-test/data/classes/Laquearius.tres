@@ -3,6 +3,7 @@
 [ext_resource type="Resource" uid="uid://c75sm7mokun8o" path="res://data/AttackShapes/diamond_2.tres" id="1_4ll2s"]
 [ext_resource type="Script" uid="uid://b217idjjy25pn" path="res://Scripts/class_data.gd" id="1_pgf8t"]
 [ext_resource type="Script" uid="uid://cqmosy6l3e36c" path="res://Scripts/skill_data.gd" id="2_4ll2s"]
+[ext_resource type="Texture2D" uid="uid://dy28ogqn2s4vd" path="res://ART/Laqu.png" id="4_h7f0u"]
 
 [resource]
 script = ExtResource("1_pgf8t")
@@ -12,4 +13,5 @@ move_range = 3
 initiative = 9
 max_armor = 25
 attack_pattern = ExtResource("1_4ll2s")
+sprite_texture = ExtResource("4_h7f0u")
 metadata/_custom_type_script = "uid://b217idjjy25pn"

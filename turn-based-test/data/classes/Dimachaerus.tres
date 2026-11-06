@@ -5,6 +5,7 @@
 [ext_resource type="Script" uid="uid://cqmosy6l3e36c" path="res://Scripts/skill_data.gd" id="2_ccmgm"]
 [ext_resource type="Resource" uid="uid://b2mnhmcd5w53r" path="res://data/skills/flurry.tres" id="4_a6rga"]
 [ext_resource type="SpriteFrames" uid="uid://bywsnduprwm76" path="res://data/abilities/warrior.res" id="4_oyrah"]
+[ext_resource type="Texture2D" uid="uid://dodykn84h0m1e" path="res://ART/Dm.png" id="6_a6rga"]
 
 [resource]
 script = ExtResource("1_gvqsg")
@@ -12,6 +13,7 @@ display_name = "Dimachaerus"
 attack_damage = 12
 move_range = 3
 attack_pattern = ExtResource("1_rm2ou")
+sprite_texture = ExtResource("6_a6rga")
 sprite_frames = ExtResource("4_oyrah")
 skills = Array[ExtResource("2_ccmgm")]([ExtResource("4_a6rga")])
 metadata/_custom_type_script = "uid://b217idjjy25pn"

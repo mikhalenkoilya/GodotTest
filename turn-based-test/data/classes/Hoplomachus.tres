@@ -3,6 +3,7 @@
 [ext_resource type="Script" uid="uid://b217idjjy25pn" path="res://Scripts/class_data.gd" id="1_dwd7c"]
 [ext_resource type="Resource" uid="uid://b8ghr2yi85pwr" path="res://data/AttackShapes/cross_2.tres" id="1_rvpqm"]
 [ext_resource type="Script" uid="uid://cqmosy6l3e36c" path="res://Scripts/skill_data.gd" id="2_rvpqm"]
+[ext_resource type="Texture2D" uid="uid://s64syek6u6p" path="res://ART/Hopl.png" id="4_wb3dm"]
 
 [resource]
 script = ExtResource("1_dwd7c")
@@ -12,4 +13,5 @@ attack_damage = 13
 initiative = 7
 max_armor = 20
 attack_pattern = ExtResource("1_rvpqm")
+sprite_texture = ExtResource("4_wb3dm")
 metadata/_custom_type_script = "uid://b217idjjy25pn"

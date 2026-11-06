@@ -18,8 +18,17 @@ func remove_from_squad(actor: Actor) -> void:
 	
 var available_classes: Array[String] = [
 	"res://data/classes/Dimachaerus.tres",
+	"res://data/classes/Sagittarius.tres",
 	"res://data/classes/Retiarius.tres",
-	"res://data/classes/Thraex.tres"
+	"res://data/classes/Thraex.tres",
+	"res://data/classes/Laquearius.tres",
+	"res://data/classes/Secutor.tres",
+	"res://data/classes/Hoplomachus.tres",
+	"res://data/classes/Scissor.tres",
+	"res://data/classes/Velites.tres",
+	"res://data/classes/Provocator.tres",
+	"res://data/classes/Murmillo.tres",
+	"res://data/classes/Crupellarius.tres"
 ]
 
 

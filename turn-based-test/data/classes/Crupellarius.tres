@@ -4,6 +4,7 @@
 [ext_resource type="Resource" uid="uid://bgrd7suqf07rr" path="res://data/AttackShapes/square_3x3.tres" id="1_s478x"]
 [ext_resource type="Script" uid="uid://cqmosy6l3e36c" path="res://Scripts/skill_data.gd" id="2_sxf7w"]
 [ext_resource type="SpriteFrames" uid="uid://bywsnduprwm76" path="res://data/abilities/warrior.res" id="4_qr85a"]
+[ext_resource type="Texture2D" uid="uid://d2t6pjv3o56xi" path="res://ART/Crup.png" id="5_qr85a"]
 
 [resource]
 script = ExtResource("1_noi7j")
@@ -14,5 +15,6 @@ move_range = 1
 initiative = 2
 max_armor = 35
 attack_pattern = ExtResource("1_s478x")
+sprite_texture = ExtResource("5_qr85a")
 sprite_frames = ExtResource("4_qr85a")
 metadata/_custom_type_script = "uid://b217idjjy25pn"
