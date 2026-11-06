@@ -11,7 +11,7 @@ config_version=5
 [application]
 
 config/name="TurnBasedTest"
-run/main_scene="uid://2vq8jc5hcuwy"
+run/main_scene="uid://d2y4ewto4iwgg"
 config/features=PackedStringArray("4.7", "Forward Plus")
 config/icon="res://icon.svg"
 

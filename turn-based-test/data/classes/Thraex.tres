@@ -4,7 +4,7 @@
 [ext_resource type="Script" uid="uid://b217idjjy25pn" path="res://Scripts/class_data.gd" id="1_oxvdw"]
 [ext_resource type="Script" uid="uid://cqmosy6l3e36c" path="res://Scripts/skill_data.gd" id="2_qp7gk"]
 [ext_resource type="SpriteFrames" uid="uid://bywsnduprwm76" path="res://data/abilities/warrior.res" id="4_2ka3t"]
-[ext_resource type="Resource" uid="uid://duq7vyb6pcwxs" path="res://data/skills/sice_cut.tres" id="4_6fktv"]
+[ext_resource type="Resource" uid="uid://duq7vyb6pcwxs" path="res://data/skills/sica_cut.tres" id="4_6fktv"]
 [ext_resource type="Texture2D" uid="uid://dgwexy7m4muhg" path="res://ART/Thraex.png" id="5_2ka3t"]
 
 [resource]

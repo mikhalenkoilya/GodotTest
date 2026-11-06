@@ -1,0 +1,71 @@
+[gd_scene format=3 uid="uid://d2y4ewto4iwgg"]
+
+[ext_resource type="Script" uid="uid://i4no2p45g8al" path="res://Scripts/main_menu.gd" id="1_l6cm7"]
+[ext_resource type="Texture2D" uid="uid://cr6ovccd6sxdf" path="res://ART/BG.jpg" id="2_ekxnf"]
+
+[node name="MainMenu" type="Control" unique_id=478173720]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+script = ExtResource("1_l6cm7")
+
+[node name="TextureRect" type="TextureRect" parent="." unique_id=1003261866]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+scale = Vector2(1.7540773, 1.7573457)
+texture = ExtResource("2_ekxnf")
+
+[node name="MainMenuContainer" type="VBoxContainer" parent="." unique_id=1067407224]
+layout_mode = 0
+offset_left = 1175.0
+offset_top = 76.0
+offset_right = 1265.0
+offset_bottom = 260.0
+scale = Vector2(1.0079681, 1)
+offset_transform_enabled = true
+theme_override_constants/separation = 20
+alignment = 1
+
+[node name="CompanyButton" type="Button" parent="MainMenuContainer" unique_id=89647039]
+layout_mode = 2
+text = "Company"
+
+[node name="FastBattleButton" type="Button" parent="MainMenuContainer" unique_id=1040058623]
+layout_mode = 2
+text = "Fast battle"
+
+[node name="OptionsButton" type="Button" parent="MainMenuContainer" unique_id=1060118298]
+layout_mode = 2
+text = "Options"
+
+[node name="ExitButton" type="Button" parent="MainMenuContainer" unique_id=315898545]
+layout_mode = 2
+text = "Exit
+"
+
+[node name="OptionsContainer" type="VBoxContainer" parent="." unique_id=854389231]
+layout_mode = 0
+offset_left = 1182.0
+offset_top = 152.0
+offset_right = 1260.0
+offset_bottom = 210.0
+alignment = 1
+
+[node name="Label" type="Label" parent="OptionsContainer" unique_id=1734063659]
+layout_mode = 2
+text = "empty yet"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="BackButton" type="Button" parent="OptionsContainer" unique_id=296113783]
+layout_mode = 2
+text = "Back"
+
+[connection signal="pressed" from="MainMenuContainer/CompanyButton" to="." method="_on_company_pressed"]
+[connection signal="pressed" from="MainMenuContainer/CompanyButton" to="." method="_on_company_button_pressed"]
+[connection signal="pressed" from="MainMenuContainer/FastBattleButton" to="." method="_on_fast_battle_button_pressed"]
+[connection signal="pressed" from="MainMenuContainer/OptionsButton" to="." method="_on_options_button_pressed"]
+[connection signal="pressed" from="MainMenuContainer/ExitButton" to="." method="_on_exit_button_pressed"]
+[connection signal="pressed" from="OptionsContainer/BackButton" to="." method="_on_back_button_pressed"]

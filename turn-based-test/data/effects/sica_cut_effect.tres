@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="DamageEffect" format=3 uid="uid://ckfkay5bb6wlu"]
+
+[ext_resource type="Script" uid="uid://cuabxg0lekxj2" path="res://data/effects/damage_effect.gd" id="1_v3mrh"]
+
+[resource]
+script = ExtResource("1_v3mrh")
+damage_multiplier = 1.2
+armor_bypass_percent = 0.15
+metadata/_custom_type_script = "uid://bqew3cditwmkr"

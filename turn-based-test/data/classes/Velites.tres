@@ -3,6 +3,7 @@
 [ext_resource type="Resource" uid="uid://dfc7qpswu3y24" path="res://data/AttackShapes/cross_3_excl_cross_1.tres" id="1_7yhua"]
 [ext_resource type="Script" uid="uid://b217idjjy25pn" path="res://Scripts/class_data.gd" id="1_xb5ls"]
 [ext_resource type="Script" uid="uid://cqmosy6l3e36c" path="res://Scripts/skill_data.gd" id="2_doga4"]
+[ext_resource type="Resource" uid="uid://1c2cirebb618" path="res://data/skills/pinning_javelin.tres" id="4_4iajl"]
 [ext_resource type="Texture2D" uid="uid://ch3nqxp270xbn" path="res://ART/Velit.png" id="4_6dnse"]
 
 [resource]
@@ -13,4 +14,5 @@ initiative = 5
 max_armor = 15
 attack_pattern = ExtResource("1_7yhua")
 sprite_texture = ExtResource("4_6dnse")
+skills = Array[ExtResource("2_doga4")]([ExtResource("4_4iajl")])
 metadata/_custom_type_script = "uid://b217idjjy25pn"

@@ -2,9 +2,11 @@
 
 [ext_resource type="Script" uid="uid://cqmosy6l3e36c" path="res://Scripts/skill_data.gd" id="1_data"]
 [ext_resource type="Script" uid="uid://bqew3cditwmkr" path="res://Scripts/skill_effect.gd" id="2_effect"]
+[ext_resource type="Resource" uid="uid://ckfkay5bb6wlu" path="res://data/effects/sica_cut_effect.tres" id="2_ps3cl"]
 
 [resource]
 script = ExtResource("1_data")
 display_name = "Sica Cut"
 description = "Strikes an adjacent enemy, dealing 1.2x ATK. 15% of damage bypasses Armor."
+effects = Array[ExtResource("2_effect")]([ExtResource("2_ps3cl")])
 metadata/_custom_type_script = "uid://cqmosy6l3e36c"

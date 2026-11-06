@@ -1,0 +1,7 @@
+[gd_resource type="Resource" script_class="SkillEffect" format=3 uid="uid://7y2d4q30t8d1"]
+
+[ext_resource type="Script" uid="uid://bqew3cditwmkr" path="res://Scripts/skill_effect.gd" id="1_script"]
+
+[resource]
+script = ExtResource("1_script")
+metadata/_custom_type_script = "uid://bqew3cditwmkr"
