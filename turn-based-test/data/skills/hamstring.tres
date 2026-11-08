@@ -6,5 +6,7 @@
 
 [resource]
 script = ExtResource("1_data")
+display_name = "hamstring"
+description = "Strikes an adjacent enemy (Cross 1), dealing 1.2x ATK physical damage. 15% of this damage bypasses Armor and directly reduces HP. Ends Attack phase."
 effects = Array[ExtResource("1_2yndx")]([ExtResource("2_effect")])
 metadata/_custom_type_script = "uid://cqmosy6l3e36c"

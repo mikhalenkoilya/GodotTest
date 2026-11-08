@@ -3,7 +3,7 @@
 [ext_resource type="Resource" uid="uid://bgrd7suqf07rr" path="res://data/AttackShapes/square_3x3.tres" id="1_i1kj2"]
 [ext_resource type="Script" uid="uid://b217idjjy25pn" path="res://Scripts/class_data.gd" id="1_vmww8"]
 [ext_resource type="Script" uid="uid://cqmosy6l3e36c" path="res://Scripts/skill_data.gd" id="2_egoxm"]
-[ext_resource type="Resource" path="res://data/effects/hamstring.tres" id="4_0p318"]
+[ext_resource type="Resource" uid="uid://beokd8damet4k" path="res://data/skills/hamstring.tres" id="4_0p318"]
 [ext_resource type="Texture2D" uid="uid://cjwxvgmcxum1x" path="res://ART/Sec.png" id="4_4uoau"]
 
 [resource]

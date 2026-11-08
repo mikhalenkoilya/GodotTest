@@ -344,7 +344,7 @@ func _execute_ai_turn(actor: Actor) -> void:
 	var can_attack_now = _is_cell_in_attack_pattern(ai_cell, user_cell, actor)
 
 	if not can_attack_now and _can_actor_move(actor):
-		var move_range = actor.class_data.move_range if actor.class_data else 3
+		var move_range = actor.class_data.move_range
 		if actor.get("is_rooted"): move_range = 0
 
 		var ai_reachable = _calculate_reachable_cells(ai_cell, move_range)
@@ -435,7 +435,7 @@ func _highlight_available_moves(actor: Actor) -> void:
 	if not _can_actor_move(actor): return
 
 	var actor_cell = tile_map.local_to_map(tile_map.to_local(actor.global_position))
-	var move_range = actor.class_data.move_range if actor.class_data else 3
+	var move_range = actor.class_data.move_range
 	var source_id = _get_valid_source_id()
 	reachable_cells = _calculate_reachable_cells(actor_cell, move_range)
 

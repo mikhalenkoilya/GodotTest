@@ -43,15 +43,28 @@ func _create_skill_panel() -> void:
 
 func update_player_stats(actor: Actor) -> void:
 	current_actor = actor
-	
 	if actor and actor.class_data:
 		name_label.text = actor.class_data.display_name
 		hp_label.text = "❤️ HP: %d/%d" % [actor.current_health, actor.class_data.max_hp]
 		dmg_label.text = "⚔️ DMG: %d" % actor.class_data.attack_damage
-		move_label.text = "👟 MOVE: %d" % actor.class_data.move_range
+		
+		# 🆕 GDD: Display effective move range considering Root and Slow
+		var effective_move = actor.get_effective_move_range()
+		var base_move = actor.class_data.move_range
+		
+		if effective_move == 0 and base_move > 0:
+			move_label.text = "👟 MOVE: 0 [ROOTED]"
+			move_label.modulate = Color.RED
+		elif effective_move < base_move:
+			move_label.text = "👟 MOVE: %d (-%d)" % [effective_move, base_move - effective_move]
+			move_label.modulate = Color.YELLOW
+		else:
+			move_label.text = "👟 MOVE: %d" % effective_move
+			move_label.modulate = Color.WHITE
+			
 		if armor_label:
 			armor_label.text = "🛡️ ARMOR: %d/%d" % [actor.current_armor, actor.class_data.max_armor]
-		
+			
 		skill_panel.visible = true
 		_update_skill_buttons(actor)
 	else:
@@ -104,8 +117,21 @@ func update_target_stats(target: Actor) -> void:
 		target_name_label.text = target.class_data.display_name
 		target_hp_label.text = "❤️ HP: %d/%d" % [target.current_health, target.class_data.max_hp]
 		target_dmg_label.text = "⚔️ DMG: %d" % target.class_data.attack_damage
-		target_move_label.text = "👟 MOVE: %d" % target.class_data.move_range
-	
+		
+		# 🆕 GDD: Display effective move range for target as well
+		var effective_move = target.get_effective_move_range()
+		var base_move = target.class_data.move_range
+		
+		if effective_move == 0 and base_move > 0:
+			target_move_label.text = "👟 MOVE: 0 [ROOTED]"
+			target_move_label.modulate = Color.RED
+		elif effective_move < base_move:
+			target_move_label.text = "👟 MOVE: %d (-%d)" % [effective_move, base_move - effective_move]
+			target_move_label.modulate = Color.YELLOW
+		else:
+			target_move_label.text = "👟 MOVE: %d" % effective_move
+			target_move_label.modulate = Color.WHITE
+			
 		if target_armor_label:
 			var cur_armor = target.current_armor if "current_armor" in target else target.class_data.max_armor
 			target_armor_label.text = "🛡️ ARMOR: %d/%d" % [cur_armor, target.class_data.max_armor]

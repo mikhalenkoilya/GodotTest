@@ -246,3 +246,19 @@ func consume_status_durations() -> void:
 
 func apply_status(status: StatusEffect) -> void:
 	apply_status_effect(status)
+# 🆕 GDD: Calculate effective move range considering Root and Slow
+func get_effective_move_range() -> int:
+	# Root completely overrides movement to 0
+	if is_rooted:
+		return 0
+	
+	var base_move = class_data.move_range if class_data else 0
+	var slow_count = 0
+	
+	# Count how many Slow effects are currently active
+	for status in active_statuses:
+		if status.type == StatusEffect.Type.SLOW:
+			slow_count += 1
+			
+	# GDD Rule: minimum Move cannot drop below 0
+	return max(0, base_move - slow_count)
