@@ -1,5 +1,6 @@
 [gd_resource type="Resource" script_class="SkillData" format=3 uid="uid://j0mwdh3gf4p8"]
 
+[ext_resource type="Resource" uid="uid://caetqcqp6tah7" path="res://data/AttackShapes/diamond_2_excl_cross_1.tres" id="1_iulv7"]
 [ext_resource type="Script" uid="uid://cqmosy6l3e36c" path="res://Scripts/skill_data.gd" id="1_skill_data"]
 [ext_resource type="Script" uid="uid://bqew3cditwmkr" path="res://Scripts/skill_effect.gd" id="1_xepny"]
 [ext_resource type="Resource" uid="uid://e5byc2vcltmb" path="res://data/effects/net_damage_effect.tres" id="2_effect"]
@@ -11,6 +12,7 @@ description = "Throws a net targeting 1 enemy within Diamond 2 range. Deals 0.5x
 cooldown = 3
 cast_range = 2
 min_range = 2
+attack_pattern = ExtResource("1_iulv7")
 effects = Array[ExtResource("1_xepny")]([ExtResource("2_effect")])
 blocked_by_disarm = false
 metadata/_custom_type_script = "uid://cqmosy6l3e36c"

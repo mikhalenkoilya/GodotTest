@@ -344,29 +344,41 @@ func _execute_ai_turn(actor: Actor) -> void:
 	var can_attack_now = _is_cell_in_attack_pattern(ai_cell, user_cell, actor)
 
 	if not can_attack_now and _can_actor_move(actor):
+		# Use GDD-compliant movement range (accounts for Root/Slow)
 		var move_range = actor.class_data.move_range
-		if actor.get("is_rooted"): move_range = 0
+		if actor.has_method("get_effective_move_range"):
+			move_range = actor.get_effective_move_range()
+		elif actor.get("is_rooted"): 
+			move_range = 0
 
 		var ai_reachable = _calculate_reachable_cells(ai_cell, move_range)
 		var best_cell = ai_cell
-		var best_distance = 99999
-		var can_attack_from_best = false
+		var best_score = -99999 # Start with a very low score
 
 		for cell in ai_reachable:
 			var can_attack = _is_cell_in_attack_pattern(cell, user_cell, actor)
 			var dist = abs(user_cell.x - cell.x) + abs(user_cell.y - cell.y)
 			
-			if can_attack and not can_attack_from_best:
-				can_attack_from_best = true
+			# 🆕 SKIRMISHER SCORING SYSTEM
+			var score = 0
+			if can_attack:
+				# If we can attack, we want to KITE. 
+				# We add a massive base score (1000) to prioritize attacking over just approaching.
+				# We ADD the distance so the AI prefers FURTHER tiles (e.g., Cross 3 over Cross 2).
+				score = 1000 + dist 
+			else:
+				# If we can't attack, we want to APPROACH.
+				# We make the score negative, so a smaller distance results in a higher score.
+				score = -dist
+
+			if score > best_score:
+				best_score = score
 				best_cell = cell
-				best_distance = dist
-			elif can_attack == can_attack_from_best and dist < best_distance:
-				best_cell = cell
-				best_distance = dist
 
 		if best_cell != ai_cell:
 			print("🤖 %s moving to %s" % [actor.name, best_cell])
 			await _try_move_actor_direct(actor, best_cell)
+			# Update cells after moving
 			ai_cell = tile_map.local_to_map(tile_map.to_local(actor.global_position))
 			user_cell = tile_map.local_to_map(tile_map.to_local(target_player.global_position))
 
@@ -443,25 +455,26 @@ func _highlight_available_moves(actor: Actor) -> void:
 		grid_layer.set_cell(cell, source_id, HIGHLIGHT_ATLAS_COORDS)
 		highlighted_cells.append(cell)
 
-# FIX: Dynamically calculate range based on selected skill or default attack pattern
 func _highlight_attack_range(actor: Actor) -> void:
 	_clear_highlight()
 	var actor_cell = tile_map.local_to_map(tile_map.to_local(actor.global_position))
 	var source_id = _get_valid_source_id()
 	var attack_cells: Array[Vector2i] = []
 
-	if selected_skill:
-		var min_r = selected_skill.min_range
-		var max_r = selected_skill.cast_range
-		for x in range(-max_r, max_r + 1):
-			for y in range(-max_r, max_r + 1):
-				var dist = abs(x) + abs(y)
-				if dist >= min_r and dist <= max_r and (x != 0 or y != 0):
-					attack_cells.append(actor_cell + Vector2i(x, y))
+	if selected_skill and selected_skill.attack_pattern:
+		# 🆕 SKILL SHAPE: Use the pre-defined cells from the .tres file
+		for offset in selected_skill.attack_pattern.relative_cells:
+			if offset != Vector2i.ZERO: # Prevent highlighting the caster's own tile
+				attack_cells.append(actor_cell + offset)
+				
 	elif actor.class_data and actor.class_data.attack_pattern:
+		# BASIC ATTACK SHAPE: Fallback to the class's default attack pattern
 		for offset in actor.class_data.attack_pattern.relative_cells:
-			attack_cells.append(actor_cell + offset)
+			if offset != Vector2i.ZERO: 
+				attack_cells.append(actor_cell + offset)
+			
 	else:
+		# FALLBACK: Standard 1-tile cross if no data is found
 		for x in range(-1, 2):
 			for y in range(-1, 2):
 				if abs(x) + abs(y) <= 1 and (x != 0 or y != 0):

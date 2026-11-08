@@ -1,8 +1,6 @@
 [gd_resource type="Resource" script_class="DamageAndSlowEffect" format=3 uid="uid://dj4ik5ub4g8m2"]
 
-[ext_resource type="Script" uid="uid://bqew3cditwmkr" path="res://data/effects/damage_and_slow_effect.gd" id="1_script"]
+[ext_resource type="Script" uid="uid://1pkjdp0ohpck" path="res://data/effects/damage_and_slow_effect.gd" id="1_divt1"]
 
 [resource]
-script = ExtResource("1_script")
-damage_multiplier = 1.0
-slow_duration = 1
+script = ExtResource("1_divt1")

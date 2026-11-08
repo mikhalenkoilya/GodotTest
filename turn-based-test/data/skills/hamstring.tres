@@ -1,12 +1,16 @@
 [gd_resource type="Resource" script_class="SkillData" format=3 uid="uid://beokd8damet4k"]
 
-[ext_resource type="Script" uid="uid://bqew3cditwmkr" path="res://Scripts/skill_effect.gd" id="1_2yndx"]
 [ext_resource type="Script" uid="uid://cqmosy6l3e36c" path="res://Scripts/skill_data.gd" id="1_data"]
+[ext_resource type="Resource" uid="uid://bgrd7suqf07rr" path="res://data/AttackShapes/square_3x3.tres" id="1_hys0q"]
+[ext_resource type="Script" uid="uid://bqew3cditwmkr" path="res://Scripts/skill_effect.gd" id="2_4e7si"]
 [ext_resource type="Resource" uid="uid://7y2d4q30t8d1" path="res://data/effects/hamstring_effect.tres" id="2_effect"]
 
 [resource]
 script = ExtResource("1_data")
-display_name = "hamstring"
-description = "Strikes an adjacent enemy (Cross 1), dealing 1.2x ATK physical damage. 15% of this damage bypasses Armor and directly reduces HP. Ends Attack phase."
-effects = Array[ExtResource("1_2yndx")]([ExtResource("2_effect")])
+display_name = "Hamstring"
+description = "Attacks an enemy within Square 1 range. Deals 1.0x ATK physical damage and applies Slow (-1 Move) for 1 turn. This action immediately ends the Attack phase."
+cooldown = 3
+min_range = 1
+attack_pattern = ExtResource("1_hys0q")
+effects = Array[ExtResource("2_4e7si")]([ExtResource("2_effect")])
 metadata/_custom_type_script = "uid://cqmosy6l3e36c"

@@ -1,15 +1,17 @@
 [gd_resource type="Resource" script_class="SkillData" format=3 uid="uid://1c2cirebb618"]
 
-[ext_resource type="Script" uid="uid://bqew3cditwmkr" path="res://Scripts/skill_effect.gd" id="1_4fhb8"]
+[ext_resource type="Resource" uid="uid://dfc7qpswu3y24" path="res://data/AttackShapes/cross_3_excl_cross_1.tres" id="1_0it5a"]
+[ext_resource type="Script" uid="uid://bqew3cditwmkr" path="res://Scripts/skill_effect.gd" id="1_3w4ub"]
 [ext_resource type="Script" uid="uid://cqmosy6l3e36c" path="res://Scripts/skill_data.gd" id="1_data"]
 [ext_resource type="Resource" uid="uid://dj4ik5ub4g8m2" path="res://data/effects/javelin_damage_effect.tres" id="2_effect"]
 
 [resource]
 script = ExtResource("1_data")
 display_name = "Pinning Javelin"
-description = "Throws a javelin in a straight line (Cross 3, excl. adjacent). Deals 1.0x ATK physical damage and applies Slow (-1 Movement) for 1 turn. Ends Attack phase."
+description = "Throws a javelin in a straight line at an enemy (Cross 3, excluding adjacent Cross 1). Deals 1.0x ATK physical damage and applies Slow (-1 Movement) for 1 turn. Using this skill immediately ends the Attack phase."
 cooldown = 3
 cast_range = 3
 min_range = 2
-effects = Array[ExtResource("1_4fhb8")]([ExtResource("2_effect"), ExtResource("2_effect")])
+attack_pattern = ExtResource("1_0it5a")
+effects = Array[ExtResource("1_3w4ub")]([ExtResource("2_effect")])
 metadata/_custom_type_script = "uid://cqmosy6l3e36c"

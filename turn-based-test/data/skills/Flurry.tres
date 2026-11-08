@@ -1,6 +1,7 @@
 [gd_resource type="Resource" script_class="SkillData" format=3 uid="uid://b2mnhmcd5w53r"]
 
 [ext_resource type="Script" uid="uid://bqew3cditwmkr" path="res://Scripts/skill_effect.gd" id="1_o41u5"]
+[ext_resource type="Resource" uid="uid://b8ggr2yi85pwq" path="res://data/AttackShapes/cross_1.tres" id="1_y48fx"]
 [ext_resource type="Script" uid="uid://cqmosy6l3e36c" path="res://Scripts/skill_data.gd" id="2_sibid"]
 [ext_resource type="Resource" uid="uid://cqkwe5sann0or" path="res://data/effects/flurry_damage_effect.tres" id="2_y48fx"]
 
@@ -9,5 +10,6 @@ script = ExtResource("2_sibid")
 display_name = "Flurry"
 description = "Unleashes a rapid flurry of 3 strikes on an adjacent target. Each strike deals 0.7x ATK physical damage. Armor is stripped per hit."
 cooldown = 3
+attack_pattern = ExtResource("1_y48fx")
 effects = Array[ExtResource("1_o41u5")]([ExtResource("2_y48fx")])
 metadata/_custom_type_script = "uid://cqmosy6l3e36c"

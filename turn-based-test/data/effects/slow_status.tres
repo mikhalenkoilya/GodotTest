@@ -1,8 +1,11 @@
-[gd_resource type="Resource" script_class="SkillEffect" format=3 uid="uid://dwt7ryvb1x0g7"]
+[gd_resource type="Resource" script_class="StatusEffect" format=3 uid="uid://dwt7ryvb1x0g7"]
 
-[ext_resource type="Script" uid="uid://bqew3cditwmkr" path="res://Scripts/skill_effect.gd" id="1_qxrey"]
+[ext_resource type="Script" uid="uid://c7dbtt235wfdw" path="res://Scripts/status_effect.gd" id="1_status_script"]
 
 [resource]
-script = ExtResource("1_qxrey")
+script = ExtResource("1_status_script")
+status_name = "Slow"
+type = 4
+duration = 1
 description = "Reduces Movement by 1. Cannot reduce Movement below 1 (Velites rule) or 0 (Global rule)."
-metadata/_custom_type_script = "uid://bqew3cditwmkr"
+metadata/_custom_type_script = "uid://c7dbtt235wfdw"

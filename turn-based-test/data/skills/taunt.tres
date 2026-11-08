@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="SkillData" format=3 uid="uid://b53t42ga8046p"]
+
+[ext_resource type="Script" uid="uid://cqmosy6l3e36c" path="res://Scripts/skill_data.gd" id="1_data"]
+[ext_resource type="Script" uid="uid://bqew3cditwmkr" path="res://Scripts/skill_effect.gd" id="1_no2h3"]
+[ext_resource type="Resource" path="res://data/effects/taunt_effect.tres" id="2_effect"]
+[ext_resource type="Resource" uid="uid://c75sn7mokun8p" path="res://data/AttackShapes/diamond_3.tres" id="3_shape"]
+
+[resource]
+script = ExtResource("1_data")
+display_name = "Taunt"
+description = "Forces an enemy within Diamond 3 to move into melee range and attack. If blocked/Rooted, they move as close as possible and attack if able."
+cast_range = 3
+attack_pattern = ExtResource("3_shape")
+effects = Array[ExtResource("1_no2h3")]([ExtResource("2_effect")])
+metadata/_custom_type_script = "uid://cqmosy6l3e36c"
