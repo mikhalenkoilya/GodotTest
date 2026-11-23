@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="DisarmEffect" format=3 uid="uid://cdisarme1fx01"]
+
+[ext_resource type="Script" path="res://data/effects/disarm_effect.gd" id="1_script"]
+[ext_resource type="Resource" uid="uid://cdisarmst1a2x" path="res://data/effects/disarm_status.tres" id="2_disarm"]
+
+[resource]
+script = ExtResource("1_script")
+description = "Deals 0.75x ATK physical damage and Disarms the target for 1 turn."
+damage_multiplier = 0.75
+armor_bypass_percent = 0.0
+applies_status = ExtResource("2_disarm")
