@@ -2,15 +2,14 @@
 
 [ext_resource type="Script" uid="uid://cqmosy6l3e36c" path="res://Scripts/skill_data.gd" id="1_data"]
 [ext_resource type="Resource" uid="uid://b8ggr2yi85pwq" path="res://data/AttackShapes/cross_1.tres" id="1_shape"]
-[ext_resource type="Script" uid="uid://bqew3cditwmkr" path="res://Scripts/skill_effect.gd" id="2_effect_type"]
 [ext_resource type="Resource" uid="uid://cdisarme1fx01" path="res://data/effects/disarm_effect.tres" id="2_effect"]
+[ext_resource type="Script" uid="uid://bqew3cditwmkr" path="res://Scripts/skill_effect.gd" id="2_effect_type"]
 
 [resource]
 script = ExtResource("1_data")
 display_name = "Disarm"
 description = "Strikes an adjacent enemy with a sweeping cut, dealing 0.75x ATK physical damage and Disarming them for 1 turn (the target cannot attack, but can still move)."
 cooldown = 3
-cast_range = 1
 min_range = 1
 attack_pattern = ExtResource("1_shape")
 effects = Array[ExtResource("2_effect_type")]([ExtResource("2_effect")])

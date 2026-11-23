@@ -44,6 +44,7 @@ var current_basic_attack_pattern: AttackPattern:
 var is_stunned: bool = false
 var is_rooted: bool = false
 var is_disarmed: bool = false
+var taunt_source: Actor = null
 
 # Optional: Track turn duration for status effects (e.g., "Stunned for 1 turn")
 var stun_duration: int = 0
@@ -76,13 +77,17 @@ func apply_status_effect(status: StatusEffect) -> void:
 	print("🔗 %s получил эффект: %s на %d ход(ов)" % [name, new_status.status_name, new_status.duration])
 	_update_status_flags()
 
-# Call this at the END of the actor's turn to tick down durations 
+# Update the existing update_status_effects() function:
 func update_status_effects() -> void:
-	# Tick down durations at the end of the actor's turn
 	for i in range(active_statuses.size() - 1, -1, -1):
 		active_statuses[i].duration -= 1
 		if active_statuses[i].duration <= 0:
 			print("✅ Эффект %s на %s закончился" % [active_statuses[i].status_name, name])
+			
+			# 🆕 Clear taunt source when the taunt status expires
+			if active_statuses[i].type == StatusEffect.Type.TAUNTED:
+				taunt_source = null
+				
 			active_statuses.remove_at(i)
 	
 	_update_status_flags()

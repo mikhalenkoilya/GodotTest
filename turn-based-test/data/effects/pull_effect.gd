@@ -7,5 +7,7 @@ func execute(attacker: Actor, target: Actor, skill_data: SkillData, turn_manager
 
 	var adjacent_cell = turn_manager._get_valid_adjacent_cell(attacker, target)
 	if adjacent_cell != Vector2i(-1, -1):
-		var target_pos = turn_manager.tile_map.map_to_local(adjacent_cell)
+		# FIX: Added .to_global() to match the correct coordinate conversion 
+		# used in taunt_effect.gd and TurnManager._try_move_actor
+		var target_pos = turn_manager.tile_map.to_global(turn_manager.tile_map.map_to_local(adjacent_cell))
 		await target.move_to(target_pos)

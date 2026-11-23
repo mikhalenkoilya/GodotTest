@@ -336,7 +336,16 @@ func _execute_ai_turn(actor: Actor) -> void:
 	if not _can_actor_act(actor):
 		return
 
-	var target_player = _find_closest_friendly(actor)
+	# 🆕 TAUNT LOGIC: If taunted, prioritize the taunt source over the closest friendly
+	var target_player: Actor = null
+	if actor.taunt_source != null and is_instance_valid(actor.taunt_source) and not actor.taunt_source.is_dead:
+		target_player = actor.taunt_source
+		print("🗣️ %s is TAUNTED by %s and will prioritize them!" % [actor.name, actor.taunt_source.name])
+	else:
+		# Clear invalid taunt source just in case
+		actor.taunt_source = null
+		target_player = _find_closest_friendly(actor)
+		
 	if not target_player: return
 
 	var ai_cell = tile_map.local_to_map(tile_map.to_local(actor.global_position))
@@ -359,16 +368,16 @@ func _execute_ai_turn(actor: Actor) -> void:
 			var can_attack = _is_cell_in_attack_pattern(cell, user_cell, actor)
 			var dist = abs(user_cell.x - cell.x) + abs(user_cell.y - cell.y)
 			
-			# 🆕 SKIRMISHER SCORING SYSTEM
 			var score = 0
 			if can_attack:
-				# If we can attack, we want to KITE. 
-				# We add a massive base score (1000) to prioritize attacking over just approaching.
-				# We ADD the distance so the AI prefers FURTHER tiles (e.g., Cross 3 over Cross 2).
-				score = 1000 + dist 
+				if actor.taunt_source != null:
+					# 🆕 Taunted enemies aggressively want to be as CLOSE as possible to their taunter to ensure they hit
+					score = 2000 - dist 
+				else:
+					# Normal skirmishers want to KITE (maximize distance while still attacking)
+					score = 1000 + dist 
 			else:
-				# If we can't attack, we want to APPROACH.
-				# We make the score negative, so a smaller distance results in a higher score.
+				# If we can't attack, we want to APPROACH (minimize distance)
 				score = -dist
 
 			if score > best_score:

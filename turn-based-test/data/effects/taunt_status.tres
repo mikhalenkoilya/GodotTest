@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="StatusEffect" format=3 uid="uid://crc21n4w5rpoh"]
+
+[ext_resource type="Script" uid="uid://c7dbtt235wfdw" path="res://Scripts/status_effect.gd" id="1_status"]
+
+[resource]
+script = ExtResource("1_status")
+status_name = "Taunt"
+type = 5
+description = "Forces the target to prioritize moving toward and attacking the Provocator on their turn."
+metadata/_custom_type_script = "uid://c7dbtt235wfdw"

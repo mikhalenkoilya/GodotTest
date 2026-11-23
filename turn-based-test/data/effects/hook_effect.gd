@@ -1,9 +1,6 @@
 class_name HookEffect
 extends SkillEffect
 
-# Laquearius "Hook": lashes out with a lasso, dealing physical damage and
-# dragging the target to an empty tile adjacent to the caster.
-
 @export var damage_multiplier: float = 0.5
 @export var applies_status: StatusEffect = null
 
@@ -18,14 +15,16 @@ func execute(attacker: Actor, target: Actor, skill_data: SkillData, turn_manager
 		if target.is_dead:
 			return
 
-	# 2. Forced movement: respect immunity flags, like Pull/Knockback do.
+	# 2. Forced movement: respect immunity flags.
 	if target.class_data.immune_to_forced_movement:
 		return
 	if target.has_status("Root"):
 		return
 
-	# 3. Pull the target onto an empty tile adjacent to the attacker.
+	# 3. Pull the target onto the *closest* empty tile adjacent to the attacker.
 	var actor_cell = turn_manager.tile_map.local_to_map(turn_manager.tile_map.to_local(attacker.global_position))
+	var target_cell = turn_manager.tile_map.local_to_map(turn_manager.tile_map.to_local(target.global_position))
+	
 	var adjacent_cells = [
 		actor_cell + Vector2i(1, 0),
 		actor_cell + Vector2i(-1, 0),
@@ -34,13 +33,19 @@ func execute(attacker: Actor, target: Actor, skill_data: SkillData, turn_manager
 	]
 
 	var destination_cell = Vector2i(-1, -1)
+	var min_dist = 999999
+
 	for cell in adjacent_cells:
 		if turn_manager._is_cell_occupied(cell):
 			continue
 		if turn_manager._get_tile_cost(cell) >= 9999: # wall / impassable
 			continue
-		destination_cell = cell
-		break
+		
+		# Calculate distance to target's original position to find the closest cell
+		var dist = abs(cell.x - target_cell.x) + abs(cell.y - target_cell.y)
+		if dist < min_dist:
+			min_dist = dist
+			destination_cell = cell
 
 	if destination_cell == Vector2i(-1, -1):
 		return # fully surrounded: the hook catches but cannot drag

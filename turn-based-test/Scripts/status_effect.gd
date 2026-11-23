@@ -2,7 +2,7 @@ extends Resource
 class_name StatusEffect
 
 # 🆕 Added SLOW to the enum
-enum Type { ROOT, DISARM, STUN, BUFF, SLOW }
+enum Type { ROOT, DISARM, STUN, BUFF, SLOW, TAUNTED }
 
 @export var status_name: String = "New Status"
 @export var type: Type = Type.STUN
