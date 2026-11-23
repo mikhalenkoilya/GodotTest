@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="HookEffect" load_steps=3 format=3 uid="uid://bhk7e2m4xq9pl"]
+
+[ext_resource type="Script" uid="uid://chq6x3lqj4tqm" path="res://data/effects/hook_effect.gd" id="1_script"]
+[ext_resource type="Resource" uid="uid://pok64f1st5ga" path="res://data/effects/root_status.tres" id="2_root"]
+
+[resource]
+script = ExtResource("1_script")
+description = "Deals 0.5x ATK physical damage and drags the target to an empty tile adjacent to the caster."
+damage_multiplier = 0.5
+applies_status = ExtResource("2_root")
+metadata/_custom_type_script = "uid://bqew3cditwmkr"
