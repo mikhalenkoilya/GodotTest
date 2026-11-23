@@ -1,7 +1,8 @@
-[gd_resource type="Resource" script_class="TauntEffect" format=3]
+[gd_resource type="Resource" script_class="TauntEffect" load_steps=2 format=3]
 
-[ext_resource type="Script" path="res://data/effects/taunt_effect.gd" id="1_script"]
+[ext_resource type="Script" uid="uid://b7es2xed35rvx" path="res://data/effects/taunt_effect.gd" id="1_script"]
 
 [resource]
-script = ExtResource("1_j1qho")
+script = ExtResource("1_script")
+description = "Forces the target to move into melee range of the Provocator and attack them."
 metadata/_custom_type_script = "uid://bqew3cditwmkr"
